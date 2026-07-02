@@ -131,6 +131,11 @@ export const useAppStore = create<AppState>()((set) => ({
         fetch(`${API_URL}/time-sessions`, { headers: getAuthHeaders() }),
         fetch(`${API_URL}/settings`, { headers: getAuthHeaders() })
       ]);
+
+      if (!todosRes.ok || !eventsRes.ok || !linksRes.ok || !sessionsRes.ok || !settingsRes.ok) {
+        throw new Error('One or more API requests failed');
+      }
+
       const todos = await todosRes.json();
       const events = await eventsRes.json();
       const links = await linksRes.json();
