@@ -69,10 +69,16 @@ export interface AppState {
   // Global Timer State
   timerMode: TimerMode;
   timerTime: number;
+  timerDurations: {
+    Stopwatch: number;
+    Focus: number;
+    Break: number;
+  };
   timerIsActive: boolean;
   timerSessionName: string;
   setTimerMode: (mode: TimerMode) => void;
   setTimerTime: (time: number | ((prev: number) => number)) => void;
+  setTimerDuration: (mode: TimerMode, duration: number) => void;
   setTimerIsActive: (isActive: boolean) => void;
   setTimerSessionName: (name: string) => void;
   
@@ -111,14 +117,22 @@ export const useAppStore = create<AppState>()((set) => ({
   lastLoginDate: null,
 
   // Global Timer Initial State
-  timerMode: 'Stopwatch',
-  timerTime: 0,
+  timerMode: 'Focus', // Changed default to Focus as it's a Focus Timer app
+  timerTime: 25 * 60,
+  timerDurations: {
+    Stopwatch: 0,
+    Focus: 25 * 60,
+    Break: 5 * 60,
+  },
   timerIsActive: false,
   timerSessionName: 'Deep Work',
 
   setTimerMode: (mode) => set({ timerMode: mode }),
   setTimerTime: (timeOrUpdater) => set((state) => ({
     timerTime: typeof timeOrUpdater === 'function' ? timeOrUpdater(state.timerTime) : timeOrUpdater
+  })),
+  setTimerDuration: (mode, duration) => set((state) => ({
+    timerDurations: { ...state.timerDurations, [mode]: duration }
   })),
   setTimerIsActive: (isActive) => set({ timerIsActive: isActive }),
   setTimerSessionName: (name) => set({ timerSessionName: name }),

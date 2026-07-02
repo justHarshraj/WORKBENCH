@@ -4,22 +4,42 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Play, Pause, Square, Save, Timer as TimerIcon, List, Brain, Coffee } from 'lucide-react';
 import { format } from 'date-fns';
 
-const FOCUS_TIME = 25 * 60;
-const BREAK_TIME = 5 * 60;
-
 export const TimerPage = () => {
   const {
     timeSessions,
     timerMode,
     timerTime,
+    timerDurations,
     timerIsActive,
     timerSessionName,
     setTimerMode,
     setTimerTime,
+    setTimerDuration,
     setTimerIsActive,
     setTimerSessionName,
     addTimeSession
   } = useAppStore();
+
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [editMinutes, setEditMinutes] = useState('');
+
+  // Keep local edit minutes in sync
+  useEffect(() => {
+    setEditMinutes(Math.floor(timerDurations[timerMode] / 60).toString());
+  }, [timerMode, timerDurations]);
+
+  const handleTimeSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const mins = parseInt(editMinutes);
+    if (!isNaN(mins) && mins >= 0) {
+      const newDuration = mins * 60;
+      setTimerDuration(timerMode, newDuration);
+      if (!timerIsActive) {
+        setTimerTime(newDuration);
+      }
+    }
+    setIsEditingTime(false);
+  };
 
   // Digital Clock State
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -47,16 +67,16 @@ export const TimerPage = () => {
   
   const handleReset = () => {
     setTimerIsActive(false);
-    setTimerTime(timerMode === 'Focus' ? FOCUS_TIME : timerMode === 'Break' ? BREAK_TIME : 0);
+    setTimerTime(timerDurations[timerMode]);
   };
 
   const handleSave = async () => {
-    if (timerTime === 0 && timerMode === 'Stopwatch') return;
+    if (timerTime === 0 && timerMode === 'Stopwatch' && timerDurations.Stopwatch === 0) return;
     
     setIsSaving(true);
     
-    // Calculate how much time was spent if it's focus mode
-    const duration = timerMode === 'Stopwatch' ? timerTime : (FOCUS_TIME - timerTime);
+    const isCountdown = timerMode !== 'Stopwatch' || timerDurations.Stopwatch > 0;
+    const duration = isCountdown ? (timerDurations[timerMode] - timerTime) : timerTime;
     
     if (duration > 0) {
       await addTimeSession({
@@ -73,7 +93,7 @@ export const TimerPage = () => {
   const switchMode = (newMode: TimerMode) => {
     setTimerMode(newMode);
     setTimerIsActive(false);
-    setTimerTime(newMode === 'Focus' ? FOCUS_TIME : newMode === 'Break' ? BREAK_TIME : 0);
+    setTimerTime(timerDurations[newMode]);
   };
 
   const getModeColor = () => {
@@ -82,11 +102,9 @@ export const TimerPage = () => {
     return 'text-warning border-warning/30 bg-warning/10 hover:bg-warning/20';
   };
 
-  const progress = timerMode === 'Stopwatch'
-    ? 100
-    : timerMode === 'Focus' 
-      ? ((FOCUS_TIME - timerTime) / FOCUS_TIME) * 100 
-      : ((BREAK_TIME - timerTime) / BREAK_TIME) * 100;
+  const progress = timerDurations[timerMode] === 0 
+    ? 100 
+    : ((timerDurations[timerMode] - timerTime) / timerDurations[timerMode]) * 100;
 
   return (
     <div className="max-w-5xl mx-auto py-8">
@@ -189,9 +207,36 @@ export const TimerPage = () => {
             </div>
 
             <div className="flex flex-col items-center justify-center py-8 relative z-10">
-              <div className="text-7xl md:text-9xl font-black font-mono tracking-tighter text-text-main tabular-nums mb-12">
-                {formatTime(timerTime)}
-              </div>
+              {isEditingTime ? (
+                <form onSubmit={handleTimeSubmit} className="flex flex-col items-center mb-12">
+                  <div className="flex items-center">
+                    <input
+                      autoFocus
+                      type="number"
+                      min="0"
+                      value={editMinutes}
+                      onChange={(e) => setEditMinutes(e.target.value)}
+                      onBlur={() => handleTimeSubmit()}
+                      className="text-7xl md:text-9xl font-black font-mono tracking-tighter text-text-main bg-transparent text-center border-b-4 border-accent focus:outline-none w-48 md:w-64 tabular-nums"
+                    />
+                    <span className="text-2xl font-bold text-text-muted ml-2">min</span>
+                  </div>
+                  <p className="text-sm text-text-muted mt-4">Press Enter to save</p>
+                </form>
+              ) : (
+                <div className="flex flex-col items-center mb-12">
+                  <div 
+                    className={`text-7xl md:text-9xl font-black font-mono tracking-tighter text-text-main tabular-nums ${!timerIsActive ? 'cursor-pointer hover:text-accent transition-colors' : ''}`}
+                    onClick={() => !timerIsActive && setIsEditingTime(true)}
+                    title={!timerIsActive ? "Click to edit time" : ""}
+                  >
+                    {formatTime(timerTime)}
+                  </div>
+                  {!timerIsActive && (
+                    <p className="text-sm text-text-muted mt-4 opacity-70">Click the time to set duration</p>
+                  )}
+                </div>
+              )}
 
               <div className="flex items-center gap-4">
                 {!timerIsActive ? (
@@ -211,7 +256,7 @@ export const TimerPage = () => {
                 )}
 
                 <AnimatePresence>
-                  {((timerMode === 'Stopwatch' && timerTime > 0) || (timerMode !== 'Stopwatch' && timerTime < (timerMode === 'Focus' ? FOCUS_TIME : BREAK_TIME))) && !timerIsActive && (
+                  {((timerMode === 'Stopwatch' && (timerDurations.Stopwatch === 0 ? timerTime > 0 : timerTime < timerDurations.Stopwatch)) || (timerMode !== 'Stopwatch' && timerTime < timerDurations[timerMode])) && !timerIsActive && (
                     <>
                       {timerMode !== 'Break' && (
                         <motion.button 

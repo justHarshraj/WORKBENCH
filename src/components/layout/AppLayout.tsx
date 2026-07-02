@@ -4,9 +4,6 @@ import { Sidebar } from './Sidebar';
 import { useAppStore } from '../../store';
 import { Focus, Menu } from 'lucide-react';
 
-const FOCUS_TIME = 25 * 60;
-const BREAK_TIME = 5 * 60;
-
 export function AppLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const settings = useAppStore((state) => state.settings);
@@ -15,6 +12,7 @@ export function AppLayout() {
   const {
     timerMode,
     timerTime,
+    timerDurations,
     timerIsActive,
     timerSessionName,
     setTimerTime,
@@ -25,11 +23,15 @@ export function AppLayout() {
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
-    if (timerIsActive && (timerMode === 'Stopwatch' || timerTime > 0)) {
+    
+    // Stopwatch counts down if its duration is set > 0, otherwise it counts up. Focus and Break always count down.
+    const isCountdown = timerMode !== 'Stopwatch' || timerDurations.Stopwatch > 0;
+    
+    if (timerIsActive && (!isCountdown || timerTime > 0)) {
       interval = setInterval(() => {
-        setTimerTime((prev) => timerMode === 'Stopwatch' ? prev + 1 : prev - 1);
+        setTimerTime((prev) => isCountdown ? prev - 1 : prev + 1);
       }, 1000);
-    } else if (timerIsActive && timerMode !== 'Stopwatch' && timerTime === 0) {
+    } else if (timerIsActive && isCountdown && timerTime === 0) {
       // Timer finished
       setTimerIsActive(false);
       
@@ -37,22 +39,25 @@ export function AppLayout() {
         // Save the session
         addTimeSession({
           name: timerSessionName || 'Untitled Session',
-          duration: FOCUS_TIME,
+          duration: timerDurations.Focus,
           date: new Date().toISOString()
         });
         
         // Auto-switch to break
         setTimerMode('Break');
-        setTimerTime(BREAK_TIME);
-      } else {
+        setTimerTime(timerDurations.Break);
+      } else if (timerMode === 'Break') {
         // Auto-switch to focus
         setTimerMode('Focus');
-        setTimerTime(FOCUS_TIME);
+        setTimerTime(timerDurations.Focus);
+      } else if (timerMode === 'Stopwatch') {
+        // Countdown stopwatch finished
+        setTimerTime(timerDurations.Stopwatch);
       }
     }
 
     return () => clearInterval(interval);
-  }, [timerIsActive, timerTime, timerMode, timerSessionName, addTimeSession, setTimerTime, setTimerIsActive, setTimerMode]);
+  }, [timerIsActive, timerTime, timerMode, timerSessionName, timerDurations, addTimeSession, setTimerTime, setTimerIsActive, setTimerMode]);
 
   return (
     <div className="flex h-screen bg-bg-app text-text-main overflow-hidden font-sans relative">
