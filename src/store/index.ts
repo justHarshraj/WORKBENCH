@@ -173,6 +173,7 @@ export const useAppStore = create<AppState>()((set) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(todo),
       });
+      if (!res.ok) throw new Error('Failed to create task');
       const newTodo = await res.json();
       set((state) => ({ todos: [newTodo, ...state.todos] }));
     } catch (e) {
@@ -186,6 +187,7 @@ export const useAppStore = create<AppState>()((set) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
+      if (!res.ok) throw new Error('Failed to update task');
       const updatedTodo = await res.json();
       set((state) => ({
         todos: state.todos.map((t) => (t.id === id ? updatedTodo : t)),
@@ -216,6 +218,7 @@ export const useAppStore = create<AppState>()((set) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(event),
       });
+      if (!res.ok) throw new Error('Failed to create event');
       const newEvent = await res.json();
       set((state) => ({ events: [newEvent, ...state.events] }));
     } catch (e) {
@@ -229,6 +232,7 @@ export const useAppStore = create<AppState>()((set) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
+      if (!res.ok) throw new Error('Failed to update event');
       const updatedEvent = await res.json();
       set((state) => ({
         events: state.events.map((e) => (e.id === id ? updatedEvent : e)),
@@ -259,6 +263,7 @@ export const useAppStore = create<AppState>()((set) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(link),
       });
+      if (!res.ok) throw new Error('Failed to create link');
       const newLink = await res.json();
       set((state) => ({ links: [newLink, ...state.links] }));
     } catch (e) {
@@ -292,6 +297,7 @@ export const useAppStore = create<AppState>()((set) => ({
         headers: getAuthHeaders(),
         body: JSON.stringify(session),
       });
+      if (!res.ok) throw new Error('Failed to create session');
       const newSession = await res.json();
       set((state) => ({ timeSessions: [newSession, ...state.timeSessions] }));
     } catch (e) {

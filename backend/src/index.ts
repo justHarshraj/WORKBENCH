@@ -50,8 +50,9 @@ app.post('/api/tasks', async (req: AuthRequest, res): Promise<void> => {
       return;
     }
 
+    const parsedDueDate = dueDate ? new Date(dueDate) : null;
     const newTask = await prisma.task.create({
-      data: { title, description, status, priority, dueDate, category, difficulty, completed, userId: req.user!.id }
+      data: { title, description, status, priority, dueDate: parsedDueDate, category, difficulty, completed, userId: req.user!.id }
     });
     res.status(201).json(newTask);
   } catch (error) {
@@ -66,7 +67,8 @@ app.put('/api/tasks/:id', async (req: AuthRequest, res) => {
     
     // Prevent Mass Assignment by extracting only allowed fields
     const { title, description, status, priority, dueDate, category, difficulty, completed } = req.body;
-    const updateData = { title, description, status, priority, dueDate, category, difficulty, completed };
+    const parsedDueDate = dueDate === '' ? null : (dueDate ? new Date(dueDate) : undefined);
+    const updateData = { title, description, status, priority, dueDate: parsedDueDate, category, difficulty, completed };
 
     // Clean undefined fields to not overwrite with null unintentionally
     Object.keys(updateData).forEach(key => (updateData as any)[key] === undefined && delete (updateData as any)[key]);
