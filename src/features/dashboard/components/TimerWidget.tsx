@@ -1,21 +1,42 @@
+import { useState, useEffect } from 'react';
 import { Play, Pause, Square, Coffee, Brain, Timer as TimerIcon } from 'lucide-react';
 import { useAppStore, type TimerMode } from '../../../store';
-
-const FOCUS_TIME = 25 * 60;
-const BREAK_TIME = 5 * 60;
 
 export function TimerWidget() {
   const {
     timerMode,
     timerTime,
+    timerDurations,
     timerIsActive,
     timerSessionName,
     setTimerMode,
     setTimerTime,
+    setTimerDuration,
     setTimerIsActive,
     setTimerSessionName,
     addTimeSession
   } = useAppStore();
+
+  const [isEditingTime, setIsEditingTime] = useState(false);
+  const [editMinutes, setEditMinutes] = useState('');
+
+  // Keep local edit minutes in sync
+  useEffect(() => {
+    setEditMinutes(Math.floor(timerDurations[timerMode] / 60).toString());
+  }, [timerMode, timerDurations]);
+
+  const handleTimeSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const mins = parseInt(editMinutes);
+    if (!isNaN(mins) && mins >= 0) {
+      const newDuration = mins * 60;
+      setTimerDuration(timerMode, newDuration);
+      if (!timerIsActive) {
+        setTimerTime(newDuration);
+      }
+    }
+    setIsEditingTime(false);
+  };
 
   const toggleTimer = () => {
     setTimerIsActive(!timerIsActive);
@@ -24,19 +45,24 @@ export function TimerWidget() {
   const resetTimer = () => {
     setTimerIsActive(false);
     if (timerMode === 'Stopwatch' && timerTime > 0) {
-      addTimeSession({
-        name: timerSessionName || 'Untitled Session',
-        duration: timerTime,
-        date: new Date().toISOString()
-      });
+      const isCountdown = timerDurations.Stopwatch > 0;
+      const duration = isCountdown ? (timerDurations[timerMode] - timerTime) : timerTime;
+      
+      if (duration > 0) {
+        addTimeSession({
+          name: timerSessionName || 'Untitled Session',
+          duration,
+          date: new Date().toISOString()
+        });
+      }
     }
-    setTimerTime(timerMode === 'Focus' ? FOCUS_TIME : timerMode === 'Break' ? BREAK_TIME : 0);
+    setTimerTime(timerDurations[timerMode]);
   };
 
   const switchMode = (newMode: TimerMode) => {
     setTimerMode(newMode);
     setTimerIsActive(false);
-    setTimerTime(newMode === 'Focus' ? FOCUS_TIME : newMode === 'Break' ? BREAK_TIME : 0);
+    setTimerTime(timerDurations[newMode]);
   };
 
   const formatTime = (seconds: number) => {
@@ -45,11 +71,9 @@ export function TimerWidget() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const progress = timerMode === 'Stopwatch'
-    ? 100
-    : timerMode === 'Focus' 
-      ? ((FOCUS_TIME - timerTime) / FOCUS_TIME) * 100 
-      : ((BREAK_TIME - timerTime) / BREAK_TIME) * 100;
+  const progress = timerDurations[timerMode] === 0 
+    ? 100 
+    : ((timerDurations[timerMode] - timerTime) / timerDurations[timerMode]) * 100;
 
   return (
     <div className="bg-bg-card rounded-lg border border-border-subtle overflow-hidden shadow-sm flex flex-col">
@@ -96,9 +120,30 @@ export function TimerWidget() {
 
       {/* Timer Body */}
       <div className="p-6 flex flex-col items-center justify-center relative">
-        <div className="text-display-lg font-bold text-text-main font-mono tracking-wider mb-2">
-          {formatTime(timerTime)}
-        </div>
+        {isEditingTime ? (
+          <form onSubmit={handleTimeSubmit} className="flex flex-col items-center mb-2">
+            <div className="flex items-baseline justify-center">
+              <input
+                autoFocus
+                type="number"
+                min="0"
+                value={editMinutes}
+                onChange={(e) => setEditMinutes(e.target.value)}
+                onBlur={() => handleTimeSubmit()}
+                className="text-display-lg font-bold text-text-main font-mono tracking-wider bg-transparent text-center focus:outline-none w-24 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none selection:bg-accent/30"
+              />
+              <span className="text-sm font-medium text-text-muted ml-1">m</span>
+            </div>
+          </form>
+        ) : (
+          <div 
+            className={`text-display-lg font-bold text-text-main font-mono tracking-wider mb-2 tabular-nums ${!timerIsActive ? 'cursor-pointer hover:text-accent transition-colors' : ''}`}
+            onClick={() => !timerIsActive && setIsEditingTime(true)}
+            title={!timerIsActive ? "Click to edit time" : ""}
+          >
+            {formatTime(timerTime)}
+          </div>
+        )}
         
         {(timerMode === 'Focus' || timerMode === 'Stopwatch') && (
           <input 
@@ -129,7 +174,7 @@ export function TimerWidget() {
           
           <button 
             onClick={resetTimer}
-            disabled={timerTime === (timerMode === 'Focus' ? FOCUS_TIME : timerMode === 'Break' ? BREAK_TIME : 0)}
+            disabled={timerTime === timerDurations[timerMode]}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-bg-app border border-border-subtle text-text-muted hover:text-text-main transition-colors disabled:opacity-50 disabled:hover:text-text-muted disabled:cursor-not-allowed"
           >
             <Square className="w-4 h-4" />

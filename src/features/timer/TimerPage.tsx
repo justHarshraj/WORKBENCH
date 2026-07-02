@@ -209,7 +209,7 @@ export const TimerPage = () => {
             <div className="flex flex-col items-center justify-center py-8 relative z-10">
               {isEditingTime ? (
                 <form onSubmit={handleTimeSubmit} className="flex flex-col items-center mb-12">
-                  <div className="flex items-center">
+                  <div className="flex items-baseline justify-center">
                     <input
                       autoFocus
                       type="number"
@@ -217,11 +217,11 @@ export const TimerPage = () => {
                       value={editMinutes}
                       onChange={(e) => setEditMinutes(e.target.value)}
                       onBlur={() => handleTimeSubmit()}
-                      className="text-7xl md:text-9xl font-black font-mono tracking-tighter text-text-main bg-transparent text-center border-b-4 border-accent focus:outline-none w-48 md:w-64 tabular-nums"
+                      className="text-7xl md:text-9xl font-black font-mono tracking-tighter text-text-main bg-transparent text-center focus:outline-none w-32 md:w-48 tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none selection:bg-accent/30"
                     />
                     <span className="text-2xl font-bold text-text-muted ml-2">min</span>
                   </div>
-                  <p className="text-sm text-text-muted mt-4">Press Enter to save</p>
+                  <p className="text-sm text-accent mt-4 animate-pulse">Press Enter to save</p>
                 </form>
               ) : (
                 <div className="flex flex-col items-center mb-12">
