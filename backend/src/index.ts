@@ -55,9 +55,9 @@ app.post('/api/tasks', async (req: AuthRequest, res): Promise<void> => {
       data: { title, description, status, priority, dueDate: parsedDueDate, category, difficulty, completed, userId: req.user!.id }
     });
     res.status(201).json(newTask);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create task error:', error);
-    res.status(500).json({ error: 'Failed to create task' });
+    res.status(500).json({ error: 'Failed to create task', details: error.message, stack: error.stack });
   }
 });
 
