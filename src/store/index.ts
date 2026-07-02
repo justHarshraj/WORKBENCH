@@ -167,6 +167,9 @@ export const useAppStore = create<AppState>()((set) => ({
 
   // Todos
   addTodo: async (todo) => {
+    const tempId = todo.id || crypto.randomUUID();
+    const tempTodo = { ...todo, id: tempId, createdAt: new Date().toISOString() } as Todo;
+    set((state) => ({ todos: [tempTodo, ...state.todos] }));
     try {
       const res = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
@@ -175,12 +178,18 @@ export const useAppStore = create<AppState>()((set) => ({
       });
       if (!res.ok) throw new Error('Failed to create task');
       const newTodo = await res.json();
-      set((state) => ({ todos: [newTodo, ...state.todos] }));
+      set((state) => ({ todos: state.todos.map(t => t.id === tempId ? newTodo : t) }));
     } catch (e) {
       console.error(e);
+      set((state) => ({ todos: state.todos.filter(t => t.id !== tempId) }));
     }
   },
   updateTodo: async (id, updates) => {
+    let originalTodo: Todo | undefined;
+    set((state) => {
+      originalTodo = state.todos.find(t => t.id === id);
+      return { todos: state.todos.map(t => t.id === id ? { ...t, ...updates } as Todo : t) };
+    });
     try {
       const res = await fetch(`${API_URL}/tasks/${id}`, {
         method: 'PUT',
@@ -188,30 +197,34 @@ export const useAppStore = create<AppState>()((set) => ({
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error('Failed to update task');
-      const updatedTodo = await res.json();
-      set((state) => ({
-        todos: state.todos.map((t) => (t.id === id ? updatedTodo : t)),
-      }));
     } catch (e) {
       console.error(e);
+      if (originalTodo) set((state) => ({ todos: state.todos.map(t => t.id === id ? originalTodo! : t) }));
     }
   },
   deleteTodo: async (id) => {
+    let originalTodo: Todo | undefined;
+    set((state) => {
+      originalTodo = state.todos.find(t => t.id === id);
+      return { todos: state.todos.filter(t => t.id !== id) };
+    });
     try {
-      await fetch(`${API_URL}/tasks/${id}`, { 
+      const res = await fetch(`${API_URL}/tasks/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      set((state) => ({
-        todos: state.todos.filter((t) => t.id !== id),
-      }));
+      if (!res.ok) throw new Error('Failed to delete task');
     } catch (e) {
       console.error(e);
+      if (originalTodo) set((state) => ({ todos: [...state.todos, originalTodo!] }));
     }
   },
 
   // Events
   addEvent: async (event) => {
+    const tempId = event.id || crypto.randomUUID();
+    const tempEvent = { ...event, id: tempId, createdAt: new Date().toISOString() } as DayEvent;
+    set((state) => ({ events: [tempEvent, ...state.events] }));
     try {
       const res = await fetch(`${API_URL}/events`, {
         method: 'POST',
@@ -220,12 +233,18 @@ export const useAppStore = create<AppState>()((set) => ({
       });
       if (!res.ok) throw new Error('Failed to create event');
       const newEvent = await res.json();
-      set((state) => ({ events: [newEvent, ...state.events] }));
+      set((state) => ({ events: state.events.map(e => e.id === tempId ? newEvent : e) }));
     } catch (e) {
       console.error(e);
+      set((state) => ({ events: state.events.filter(e => e.id !== tempId) }));
     }
   },
   updateEvent: async (id, updates) => {
+    let originalEvent: DayEvent | undefined;
+    set((state) => {
+      originalEvent = state.events.find(e => e.id === id);
+      return { events: state.events.map(e => e.id === id ? { ...e, ...updates } as DayEvent : e) };
+    });
     try {
       const res = await fetch(`${API_URL}/events/${id}`, {
         method: 'PUT',
@@ -233,30 +252,34 @@ export const useAppStore = create<AppState>()((set) => ({
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error('Failed to update event');
-      const updatedEvent = await res.json();
-      set((state) => ({
-        events: state.events.map((e) => (e.id === id ? updatedEvent : e)),
-      }));
     } catch (e) {
       console.error(e);
+      if (originalEvent) set((state) => ({ events: state.events.map(e => e.id === id ? originalEvent! : e) }));
     }
   },
   deleteEvent: async (id) => {
+    let originalEvent: DayEvent | undefined;
+    set((state) => {
+      originalEvent = state.events.find(e => e.id === id);
+      return { events: state.events.filter(e => e.id !== id) };
+    });
     try {
-      await fetch(`${API_URL}/events/${id}`, { 
+      const res = await fetch(`${API_URL}/events/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      set((state) => ({
-        events: state.events.filter((e) => e.id !== id),
-      }));
+      if (!res.ok) throw new Error('Failed to delete event');
     } catch (e) {
       console.error(e);
+      if (originalEvent) set((state) => ({ events: [...state.events, originalEvent!] }));
     }
   },
 
   // Links
   addLink: async (link) => {
+    const tempId = link.id || crypto.randomUUID();
+    const tempLink = { ...link, id: tempId, createdAt: new Date().toISOString() } as LinkItem;
+    set((state) => ({ links: [tempLink, ...state.links] }));
     try {
       const res = await fetch(`${API_URL}/links`, {
         method: 'POST',
@@ -265,32 +288,53 @@ export const useAppStore = create<AppState>()((set) => ({
       });
       if (!res.ok) throw new Error('Failed to create link');
       const newLink = await res.json();
-      set((state) => ({ links: [newLink, ...state.links] }));
+      set((state) => ({ links: state.links.map(l => l.id === tempId ? newLink : l) }));
     } catch (e) {
       console.error(e);
+      set((state) => ({ links: state.links.filter(l => l.id !== tempId) }));
     }
   },
   updateLink: async (id, updates) => {
-    set((state) => ({
-      links: state.links.map((l) => (l.id === id ? { ...l, ...updates } : l)),
-    }));
+    let originalLink: LinkItem | undefined;
+    set((state) => {
+      originalLink = state.links.find(l => l.id === id);
+      return { links: state.links.map(l => l.id === id ? { ...l, ...updates } as LinkItem : l) };
+    });
+    try {
+      const res = await fetch(`${API_URL}/links/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error('Failed to update link');
+    } catch (e) {
+      console.error(e);
+      if (originalLink) set((state) => ({ links: state.links.map(l => l.id === id ? originalLink! : l) }));
+    }
   },
   deleteLink: async (id) => {
+    let originalLink: LinkItem | undefined;
+    set((state) => {
+      originalLink = state.links.find(l => l.id === id);
+      return { links: state.links.filter(l => l.id !== id) };
+    });
     try {
-      await fetch(`${API_URL}/links/${id}`, { 
+      const res = await fetch(`${API_URL}/links/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-      set((state) => ({
-        links: state.links.filter((l) => l.id !== id),
-      }));
+      if (!res.ok) throw new Error('Failed to delete link');
     } catch (e) {
       console.error(e);
+      if (originalLink) set((state) => ({ links: [...state.links, originalLink!] }));
     }
   },
 
   // Time Sessions
   addTimeSession: async (session) => {
+    const tempId = session.id || crypto.randomUUID();
+    const tempSession = { ...session, id: tempId, createdAt: new Date().toISOString() } as TimeSession;
+    set((state) => ({ timeSessions: [tempSession, ...state.timeSessions] }));
     try {
       const res = await fetch(`${API_URL}/time-sessions`, {
         method: 'POST',
@@ -299,9 +343,10 @@ export const useAppStore = create<AppState>()((set) => ({
       });
       if (!res.ok) throw new Error('Failed to create session');
       const newSession = await res.json();
-      set((state) => ({ timeSessions: [newSession, ...state.timeSessions] }));
+      set((state) => ({ timeSessions: state.timeSessions.map(s => s.id === tempId ? newSession : s) }));
     } catch (e) {
       console.error(e);
+      set((state) => ({ timeSessions: state.timeSessions.filter(s => s.id !== tempId) }));
     }
   }
 }));
