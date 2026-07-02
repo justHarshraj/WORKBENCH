@@ -17,23 +17,23 @@ export function TodoModal({ isOpen, onClose, todoToEdit }: TodoModalProps) {
   const [priority, setPriority] = useState<'Low' | 'Medium' | 'High' | 'Critical'>('Medium');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState<'Todo' | 'In Progress' | 'Done'>('Todo');
-  const [deadline, setDeadline] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
   useEffect(() => {
     if (todoToEdit) {
       setTitle(todoToEdit.title);
       setDescription(todoToEdit.description || '');
-      setPriority(todoToEdit.priority);
+      setPriority(todoToEdit.priority as 'Low' | 'Medium' | 'High' | 'Critical');
       setCategory(todoToEdit.category);
-      setStatus(todoToEdit.status);
-      setDeadline(todoToEdit.deadline || '');
+      setStatus(todoToEdit.status as 'Todo' | 'In Progress' | 'Done');
+      setDueDate(todoToEdit.dueDate || '');
     } else {
       setTitle('');
       setDescription('');
       setPriority('Medium');
       setCategory('General');
       setStatus('Todo');
-      setDeadline('');
+      setDueDate('');
     }
   }, [todoToEdit, isOpen]);
 
@@ -50,7 +50,7 @@ export function TodoModal({ isOpen, onClose, todoToEdit }: TodoModalProps) {
         priority,
         category,
         status,
-        deadline,
+        dueDate,
         completed: status === 'Done'
       });
     } else {
@@ -61,7 +61,7 @@ export function TodoModal({ isOpen, onClose, todoToEdit }: TodoModalProps) {
         priority,
         category,
         status,
-        deadline,
+        dueDate,
         completed: status === 'Done',
         createdAt: new Date().toISOString()
       });
@@ -152,8 +152,8 @@ export function TodoModal({ isOpen, onClose, todoToEdit }: TodoModalProps) {
               <label className="block text-caption text-text-muted mb-1">Deadline (Optional)</label>
               <input 
                 type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
                 className="w-full bg-bg-app border border-border-subtle rounded-sm px-3 py-2 text-body-sm text-text-main focus:outline-none focus:border-text-muted"
               />
             </div>

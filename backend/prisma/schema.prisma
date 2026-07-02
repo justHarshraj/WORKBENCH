@@ -10,6 +10,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String?  // nullable for google auth
+  googleId  String?  @unique
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks        Task[]
+  events       Event[]
+  links        Link[]
+  timeSessions TimeSession[]
+  settings     Settings?
+}
+
 model Task {
   id          String   @id @default(uuid())
   title       String
@@ -22,6 +39,9 @@ model Task {
   dueDate     DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Event {
@@ -34,6 +54,9 @@ model Event {
   color       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Link {
@@ -45,6 +68,9 @@ model Link {
   icon        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model TimeSession {
@@ -54,6 +80,9 @@ model TimeSession {
   date        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Settings {
@@ -61,4 +90,7 @@ model Settings {
   theme       String   @default("dark")
   focusMode   Boolean  @default(false)
   updatedAt   DateTime @updatedAt
+
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

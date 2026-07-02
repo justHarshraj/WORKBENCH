@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAppStore, type Todo } from '../../store';
-import { Plus, Search, Filter, CheckCircle2, Circle } from 'lucide-react';
+import { Plus, Search, Filter, CheckCircle2, Circle, Clock } from 'lucide-react';
 import { TodoModal } from './components/TodoModal';
 
 export function TodoSystem() {
@@ -126,7 +126,12 @@ export function TodoSystem() {
                 )}
                 <div className="flex items-center gap-3 mt-3 text-caption text-text-muted">
                   <span className="bg-bg-app px-2 py-0.5 rounded border border-border-subtle">{todo.category}</span>
-                  {todo.deadline && <span>Due: {todo.deadline}</span>}
+                  {todo.dueDate && (
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {todo.dueDate}
+                    </div>
+                  )}
                   <span>Status: {todo.status}</span>
                 </div>
               </div>

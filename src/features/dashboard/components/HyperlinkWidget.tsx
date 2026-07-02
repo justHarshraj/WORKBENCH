@@ -28,14 +28,14 @@ export function HyperlinkWidget() {
   return (
     <div className="w-full flex flex-col">
       <div 
-        className="w-full rounded-xl overflow-hidden shadow-sm border border-border-subtle bg-[#0a0a0a] relative flex flex-col h-[400px]"
+        className="w-full rounded-xl overflow-hidden shadow-sm border border-border-subtle bg-bg-card relative flex flex-col h-[400px]"
         style={{
           backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
           backgroundSize: '24px 24px'
         }}
       >
         {/* Header */}
-        <div className="p-4 flex items-center justify-between border-b border-white/5 backdrop-blur-sm">
+        <div className="p-4 flex items-center justify-between border-b border-border-subtle backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-yellow-400 fill-yellow-400" />
             <LinkIcon className="w-5 h-5 text-green-400" />
@@ -47,7 +47,7 @@ export function HyperlinkWidget() {
                 setLinkToEdit(null);
                 setIsLinkModalOpen(true);
               }}
-              className="p-1.5 rounded-md bg-white/5 hover:bg-white/10 text-text-muted hover:text-text-main transition-colors border border-white/10"
+              className="p-1.5 rounded-md bg-bg-app hover:bg-bg-card-hover text-text-muted hover:text-text-main transition-colors border border-border-subtle"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -63,14 +63,14 @@ export function HyperlinkWidget() {
               placeholder="Search your saved links..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-white/20 transition-colors shadow-inner"
+              className="w-full bg-bg-app border border-border-subtle rounded-lg pl-9 pr-4 py-2 text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-accent transition-colors shadow-inner"
             />
           </div>
         </div>
 
         {/* Links Grid */}
         <div className="p-4 pt-2 flex-1 overflow-y-auto">
-          <div className="grid grid-cols-4 gap-4 pb-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 pb-4">
             {filteredLinks.length === 0 ? (
               <div className="col-span-4 text-center py-6 text-text-muted text-sm">
                 No links found. Click '+' to add one!
@@ -84,7 +84,7 @@ export function HyperlinkWidget() {
                   rel="noopener noreferrer"
                   className="flex flex-col items-center gap-2 group cursor-pointer"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 group-hover:border-white/30 transition-all shadow-lg backdrop-blur-sm relative">
+                  <div className="w-14 h-14 rounded-2xl bg-bg-app border border-border-subtle flex items-center justify-center group-hover:scale-105 group-hover:border-accent transition-all shadow-lg backdrop-blur-sm relative">
                     {getFaviconUrl(link.url) ? (
                       <img src={getFaviconUrl(link.url)} alt={link.title} className="w-8 h-8 rounded" />
                     ) : (

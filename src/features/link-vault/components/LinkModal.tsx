@@ -48,7 +48,7 @@ export function LinkModal({ isOpen, onClose, linkToEdit }: LinkModalProps) {
         title,
         url: finalUrl,
         category,
-        addedAt: new Date().toISOString()
+        createdAt: new Date().toISOString()
       });
     }
     

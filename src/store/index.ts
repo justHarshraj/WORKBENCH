@@ -1,6 +1,15 @@
 import { create } from 'zustand';
+import { useAuthStore } from '../features/auth/store/useAuthStore';
 
-const API_URL = 'http://localhost:5000/api';
+export const API_URL = 'http://localhost:5001/api';
+
+const getAuthHeaders = () => {
+  const token = useAuthStore.getState().token;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
 
 export interface Todo {
   id: string;
@@ -40,16 +49,38 @@ export interface TimeSession {
   date: string; // ISO string
 }
 
+export interface Settings {
+  id: string;
+  theme: string;
+  focusMode: boolean;
+}
+
+export type TimerMode = 'Stopwatch' | 'Focus' | 'Break';
+
 export interface AppState {
   todos: Todo[];
   events: DayEvent[];
   links: LinkItem[];
   timeSessions: TimeSession[];
+  settings: Settings | null;
   lastLoginDate: string | null;
+
+  // Global Timer State
+  timerMode: TimerMode;
+  timerTime: number;
+  timerIsActive: boolean;
+  timerSessionName: string;
+  setTimerMode: (mode: TimerMode) => void;
+  setTimerTime: (time: number | ((prev: number) => number)) => void;
+  setTimerIsActive: (isActive: boolean) => void;
+  setTimerSessionName: (name: string) => void;
   
   // App initialization
   fetchInitialData: () => Promise<void>;
   checkDailyReset: () => void;
+
+  // Settings
+  updateSettings: (updates: Partial<Settings>) => Promise<void>;
 
   // Todos
   addTodo: (todo: Partial<Todo>) => Promise<void>;
@@ -70,34 +101,63 @@ export interface AppState {
   addTimeSession: (session: Partial<TimeSession>) => Promise<void>;
 }
 
-export const useAppStore = create<AppState>()((set, get) => ({
+export const useAppStore = create<AppState>()((set) => ({
   todos: [],
   events: [],
   links: [],
   timeSessions: [],
+  settings: null,
   lastLoginDate: null,
+
+  // Global Timer Initial State
+  timerMode: 'Stopwatch',
+  timerTime: 0,
+  timerIsActive: false,
+  timerSessionName: 'Deep Work',
+
+  setTimerMode: (mode) => set({ timerMode: mode }),
+  setTimerTime: (timeOrUpdater) => set((state) => ({
+    timerTime: typeof timeOrUpdater === 'function' ? timeOrUpdater(state.timerTime) : timeOrUpdater
+  })),
+  setTimerIsActive: (isActive) => set({ timerIsActive: isActive }),
+  setTimerSessionName: (name) => set({ timerSessionName: name }),
   
   fetchInitialData: async () => {
     try {
-      const [todosRes, eventsRes, linksRes, sessionsRes] = await Promise.all([
-        fetch(`${API_URL}/tasks`),
-        fetch(`${API_URL}/events`),
-        fetch(`${API_URL}/links`),
-        fetch(`${API_URL}/time-sessions`)
+      const [todosRes, eventsRes, linksRes, sessionsRes, settingsRes] = await Promise.all([
+        fetch(`${API_URL}/tasks`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/events`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/links`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/time-sessions`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/settings`, { headers: getAuthHeaders() })
       ]);
       const todos = await todosRes.json();
       const events = await eventsRes.json();
       const links = await linksRes.json();
       const timeSessions = await sessionsRes.json();
-      set({ todos, events, links, timeSessions });
+      const settings = await settingsRes.json();
+      set({ todos, events, links, timeSessions, settings });
     } catch (e) {
       console.error('Failed to fetch initial data', e);
     }
   },
 
   checkDailyReset: () => {
-    // In a real app with a backend, this might be handled by a cron job on the server,
-    // but we leave this stub for frontend compatibility.
+  },
+
+  // Settings
+  updateSettings: async (updates) => {
+    try {
+      const res = await fetch(`${API_URL}/settings`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updates),
+      });
+      const updatedSettings = await res.json();
+      set({ settings: updatedSettings });
+    } catch (e) {
+      console.error(e);
+    }
   },
 
   // Todos
@@ -105,7 +165,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(todo),
       });
       const newTodo = await res.json();
@@ -118,7 +178,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/tasks/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
       const updatedTodo = await res.json();
@@ -131,7 +191,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
   deleteTodo: async (id) => {
     try {
-      await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/tasks/${id}`, { 
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
       set((state) => ({
         todos: state.todos.filter((t) => t.id !== id),
       }));
@@ -145,7 +208,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/events`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(event),
       });
       const newEvent = await res.json();
@@ -158,7 +221,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/events/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
       const updatedEvent = await res.json();
@@ -171,7 +234,10 @@ export const useAppStore = create<AppState>()((set, get) => ({
   },
   deleteEvent: async (id) => {
     try {
-      await fetch(`${API_URL}/events/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/events/${id}`, { 
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
       set((state) => ({
         events: state.events.filter((e) => e.id !== id),
       }));
@@ -185,7 +251,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/links`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(link),
       });
       const newLink = await res.json();
@@ -195,14 +261,16 @@ export const useAppStore = create<AppState>()((set, get) => ({
     }
   },
   updateLink: async (id, updates) => {
-    // API endpoint doesn't exist for update link, doing locally for compatibility
     set((state) => ({
       links: state.links.map((l) => (l.id === id ? { ...l, ...updates } : l)),
     }));
   },
   deleteLink: async (id) => {
     try {
-      await fetch(`${API_URL}/links/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/links/${id}`, { 
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
       set((state) => ({
         links: state.links.filter((l) => l.id !== id),
       }));
@@ -216,7 +284,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
     try {
       const res = await fetch(`${API_URL}/time-sessions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(session),
       });
       const newSession = await res.json();

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../../store';
+import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { format } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { CheckCircle2, Circle, Clock, Plus, Target } from 'lucide-react';
@@ -10,6 +11,7 @@ import { TimerWidget } from './components/TimerWidget';
 export function Dashboard() {
   const [greeting, setGreeting] = useState('');
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false);
+  const user = useAuthStore((state) => state.user);
   
   const todos = useAppStore((state) => state.todos) || [];
   const events = useAppStore((state) => state.events) || [];
@@ -49,7 +51,7 @@ export function Dashboard() {
     <div className="space-y-6 flex flex-col h-full animate-fade-in">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-display-md text-text-main">{greeting}, Harsh</h1>
+          <h1 className="text-display-md text-text-main">{greeting}, {user?.name || 'User'}</h1>
           <p className="text-body-sm text-text-muted mt-1">{format(new Date(), 'EEEE, MMMM do, yyyy')}</p>
         </div>
       </header>

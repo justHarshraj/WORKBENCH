@@ -110,33 +110,35 @@ export function DayPlanner() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day, i) => (
-              <div 
-                key={i} 
-                onClick={() => setCurrentDate(day)}
-                className={`p-4 border rounded-md cursor-pointer transition-colors ${
-                  isSameDay(day, currentDate) 
-                    ? 'border-accent bg-bg-app' 
-                    : 'border-border-subtle hover:border-text-muted bg-bg-app'
-                }`}
-              >
-                <div className="text-caption text-text-muted mb-1">{format(day, 'EEE')}</div>
-                <div className={`text-body-lg font-medium ${isSameDay(day, new Date()) ? 'text-accent' : 'text-text-main'}`}>
-                  {format(day, 'd')}
+          <div className="overflow-x-auto pb-4">
+            <div className="grid grid-cols-7 gap-2 min-w-[700px]">
+              {weekDays.map((day, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => setCurrentDate(day)}
+                  className={`p-4 border rounded-md cursor-pointer transition-colors ${
+                    isSameDay(day, currentDate) 
+                      ? 'border-accent bg-bg-app' 
+                      : 'border-border-subtle hover:border-text-muted bg-bg-app'
+                  }`}
+                >
+                  <div className="text-caption text-text-muted mb-1">{format(day, 'EEE')}</div>
+                  <div className={`text-body-lg font-medium ${isSameDay(day, new Date()) ? 'text-accent' : 'text-text-main'}`}>
+                    {format(day, 'd')}
+                  </div>
+                  <div className="mt-4 space-y-1">
+                    {events
+                      .filter(e => e.date === format(day, 'yyyy-MM-dd'))
+                      .map(e => (
+                        <div key={e.id} className="text-xs truncate bg-bg-card p-1 rounded" style={{ borderLeft: `2px solid ${e.color || 'var(--color-accent)'}`}}>
+                          {e.title}
+                        </div>
+                      ))
+                    }
+                  </div>
                 </div>
-                <div className="mt-4 space-y-1">
-                  {events
-                    .filter(e => e.date === format(day, 'yyyy-MM-dd'))
-                    .map(e => (
-                      <div key={e.id} className="text-xs truncate bg-bg-card p-1 rounded" style={{ borderLeft: `2px solid ${e.color || 'var(--color-accent)'}`}}>
-                        {e.title}
-                      </div>
-                    ))
-                  }
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
