@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { useAuthStore } from '../features/auth/store/useAuthStore';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+export const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl.replace(/\/$/, '')}/api`;
 
 const getAuthHeaders = () => {
   const token = useAuthStore.getState().token;
