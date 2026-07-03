@@ -35,10 +35,8 @@ export const LoginPage = () => {
       }
 
       setIsSuccess(true);
-      setTimeout(() => {
-        setAuth(data.user, data.token);
-        navigate('/');
-      }, 1500);
+      setAuth(data.user, data.token);
+      navigate('/');
     } catch (err: any) {
       setError(err.message);
       setIsLoading(false);
@@ -62,10 +60,8 @@ export const LoginPage = () => {
       }
 
       setIsSuccess(true);
-      setTimeout(() => {
-        setAuth(data.user, data.token);
-        navigate('/');
-      }, 1500);
+      setAuth(data.user, data.token);
+      navigate('/');
     } catch (err: any) {
       setError(err.message);
       setIsLoading(false);
