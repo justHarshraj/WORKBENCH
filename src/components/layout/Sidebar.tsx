@@ -79,14 +79,14 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
             onClick={handleNavClick}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200",
+                "flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-200",
                 isActive 
                   ? "bg-bg-card text-text-main" 
                   : "text-text-muted hover:bg-bg-card hover:text-text-main"
               )
             }
           >
-            <item.icon className="w-4 h-4" />
+            <item.icon className="w-[18px] h-[18px]" />
             {item.name}
           </NavLink>
         ))}
@@ -111,14 +111,14 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
           onClick={handleNavClick}
           className={({ isActive }) =>
             cn(
-              "flex items-center gap-3 px-3 py-2 mt-2 rounded-md text-sm font-medium transition-colors duration-200",
+              "flex items-center gap-2.5 px-3 py-2.5 mt-2 rounded-md text-sm font-medium transition-colors duration-200",
               isActive 
                 ? "bg-bg-card text-text-main" 
                 : "text-text-muted hover:bg-bg-card hover:text-text-main"
             )
           }
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="w-[18px] h-[18px]" />
           Settings
         </NavLink>
       </div>

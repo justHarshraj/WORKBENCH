@@ -47,8 +47,10 @@ export function Statistics() {
   const last7Days = Array.from({ length: 7 }).map((_, i) => format(subDays(new Date(), 6 - i), 'MM/dd'));
   const completionData = last7Days.map(date => {
     const completedOnThisDay = todos.filter(t => t.status === 'Done' && t.createdAt && format(new Date(t.createdAt), 'MM/dd') === date).length;
-    return { name: date, completed: completedOnThisDay + Math.floor(Math.random() * 3) }; // Mocks some data for visual aesthetics if empty
+    return { name: date, completed: completedOnThisDay };
   });
+
+  const hasCompletionData = completionData.some(d => d.completed > 0);
 
   // Pie Chart: Tasks by Priority
   const priorityData = [
@@ -61,6 +63,8 @@ export function Statistics() {
   if (priorityData.length === 0) {
     priorityData.push({ name: 'No Data', value: 1, color: 'var(--color-border-subtle)' });
   }
+
+  const hasTimeData = timeDistributionData.some(d => d.name !== 'No Data');
 
   return (
     <div className="flex flex-col h-full space-y-8 max-w-6xl mx-auto p-4 md:p-8 animate-fade-in">
@@ -119,46 +123,62 @@ export function Statistics() {
         {/* Completion History */}
         <div className="bg-bg-card border border-border-subtle p-6 rounded-xl flex flex-col shadow-sm">
           <h2 className="text-body-lg font-medium text-text-main mb-6">Completion History (7 Days)</h2>
-          <div className="flex-1 w-full min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={completionData}>
-                <defs>
-                  <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
-                <XAxis dataKey="name" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border-subtle)', borderRadius: '8px' }}
-                  itemStyle={{ color: 'var(--color-accent)' }}
-                />
-                <Area type="monotone" dataKey="completed" stroke="var(--color-accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorCompleted)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {hasCompletionData ? (
+            <div className="flex-1 w-full min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={completionData}>
+                  <defs>
+                    <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border-subtle)', borderRadius: '8px' }}
+                    itemStyle={{ color: 'var(--color-accent)' }}
+                  />
+                  <Area type="monotone" dataKey="completed" stroke="var(--color-accent)" strokeWidth={3} fillOpacity={1} fill="url(#colorCompleted)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-text-muted min-h-[250px]">
+              <CheckCircle2 className="w-10 h-10 mb-3 opacity-20" />
+              <p className="text-body-sm">No completions yet this week.</p>
+              <p className="text-caption mt-1 opacity-70">Complete some tasks to see your trends!</p>
+            </div>
+          )}
         </div>
 
         {/* Time Distribution */}
         <div className="bg-bg-card border border-border-subtle p-6 rounded-xl flex flex-col shadow-sm">
           <h2 className="text-body-lg font-medium text-text-main mb-6">Time Spent (Minutes)</h2>
-          <div className="flex-1 w-full min-h-[250px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={timeDistributionData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" horizontal={true} vertical={false} />
-                <XAxis type="number" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis dataKey="name" type="category" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  cursor={{ fill: 'var(--color-border-subtle)', opacity: 0.2 }}
-                  contentStyle={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border-subtle)', borderRadius: '8px' }}
-                  itemStyle={{ color: 'var(--color-blue-400)' }}
-                />
-                <Bar dataKey="time" fill="#60A5FA" radius={[0, 4, 4, 0]} barSize={20} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {hasTimeData ? (
+            <div className="flex-1 w-full min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={timeDistributionData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" horizontal={true} vertical={false} />
+                  <XAxis type="number" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="name" type="category" stroke="var(--color-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    cursor={{ fill: 'var(--color-border-subtle)', opacity: 0.2 }}
+                    contentStyle={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border-subtle)', borderRadius: '8px' }}
+                    itemStyle={{ color: 'var(--color-blue-400)' }}
+                  />
+                  <Bar dataKey="time" fill="#60A5FA" radius={[0, 4, 4, 0]} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-text-muted min-h-[250px]">
+              <Timer className="w-10 h-10 mb-3 opacity-20" />
+              <p className="text-body-sm">No focus sessions recorded.</p>
+              <p className="text-caption mt-1 opacity-70">Start a timer to begin tracking!</p>
+            </div>
+          )}
         </div>
 
         {/* Tasks by Priority (Moved to bottom or 3rd item if using 3 cols, let's keep it clean as 3rd block spanning full if needed, or replace pie chart? User might like priority pie. Let's add it below) */}

@@ -76,11 +76,11 @@ export function AppLayout() {
           </header>
         )}
         
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 relative">
           {settings?.focusMode && (
             <button 
               onClick={() => updateSettings({ focusMode: false })}
-              className="absolute top-4 left-4 z-50 p-2 bg-bg-card border border-border-subtle rounded-full text-text-muted hover:text-text-main shadow-lg"
+              className="fixed top-4 left-4 z-50 p-2.5 bg-bg-card border border-border-subtle rounded-full text-text-muted hover:text-text-main shadow-lg backdrop-blur-sm"
               title="Exit Focus Mode"
             >
               <Focus className="w-5 h-5" />

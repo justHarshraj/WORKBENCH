@@ -30,7 +30,7 @@ export function DayPlanner() {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6 max-w-5xl mx-auto p-4 md:p-8">
+    <div className="flex flex-col h-full space-y-5 max-w-5xl mx-auto p-3 md:p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -38,7 +38,7 @@ export function DayPlanner() {
           <p className="text-body-sm text-text-muted mt-1">Organize your time effectively.</p>
         </div>
         
-        <div className="flex items-center gap-3 bg-bg-card p-1 rounded-pill border border-border-subtle">
+        <div className="flex items-center gap-3 bg-bg-card p-1 rounded-pill border border-border-subtle w-fit">
           <button
             onClick={() => setView('timeline')}
             className={`px-4 py-1.5 rounded-pill text-sm font-medium transition-colors flex items-center gap-2 ${
@@ -59,7 +59,7 @@ export function DayPlanner() {
       </div>
 
       {/* Date Navigation */}
-      <div className="flex items-center justify-between bg-bg-card rounded-md p-4 border border-border-subtle">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-bg-card rounded-md p-3 md:p-4 border border-border-subtle">
         <div className="flex items-center gap-4">
           <button onClick={() => setCurrentDate(addDays(currentDate, -1))} className="p-2 hover:bg-bg-app rounded-full transition-colors text-text-muted hover:text-text-main">
             <ChevronLeft className="w-5 h-5" />
@@ -74,14 +74,14 @@ export function DayPlanner() {
         </div>
         <button 
           onClick={handleAddNew}
-          className="bg-text-main text-bg-app px-4 py-2 rounded-pill text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity"
+          className="bg-text-main text-bg-app px-4 py-2 rounded-pill text-sm font-medium flex items-center gap-2 hover:opacity-90 transition-opacity w-full sm:w-auto justify-center"
         >
           <Plus className="w-4 h-4" /> Add Event
         </button>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 bg-bg-card rounded-lg border border-border-subtle p-6 overflow-y-auto">
+      <div className="flex-1 bg-bg-card rounded-lg border border-border-subtle p-4 md:p-6 overflow-y-auto">
         {view === 'timeline' ? (
           <div className="space-y-4">
             {todaysEvents.length === 0 ? (

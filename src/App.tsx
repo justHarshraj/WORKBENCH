@@ -14,13 +14,14 @@ import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useAuthStore } from './features/auth/store/useAuthStore';
+import { LandingPage } from './features/landing/LandingPage';
 
 function App() {
   const checkDailyReset = useAppStore((state) => state.checkDailyReset);
   const fetchInitialData = useAppStore((state) => state.fetchInitialData);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const settings = useAppStore((state) => state.settings);
-  const [loading, setLoading] = useState(true);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   useEffect(() => {
     if (settings?.theme === 'light') {
@@ -35,24 +36,26 @@ function App() {
   useEffect(() => {
     checkDailyReset();
     if (isAuthenticated) {
+      setIsDataReady(false);
       fetchInitialData().finally(() => {
-        setTimeout(() => setLoading(false), 500);
+        setTimeout(() => setIsDataReady(true), 500);
       });
-    } else {
-      setTimeout(() => setLoading(false), 500);
     }
   }, [checkDailyReset, fetchInitialData, isAuthenticated]);
 
-  if (loading) {
+  if (isAuthenticated && !isDataReady) {
     return <DBZLoader />;
   }
 
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
+        <Route path="/welcome" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         
+        {/* Protected app routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
@@ -65,6 +68,9 @@ function App() {
             <Route path="settings" element={<Settings />} />
           </Route>
         </Route>
+
+        {/* Catch-all: show landing page for unauthenticated users */}
+        <Route path="*" element={<LandingPage />} />
       </Routes>
     </BrowserRouter>
   );
