@@ -34,11 +34,13 @@ export const TimerPage = () => {
     if (e) e.preventDefault();
     const mins = parseInt(editMinutes);
     if (!isNaN(mins) && mins >= 0) {
-      const newDuration = mins * 60;
+      const clampedMins = Math.min(mins, 1440);
+      const newDuration = clampedMins * 60;
       setTimerDuration(timerMode, newDuration);
       if (!timerIsActive) {
         setTimerTime(newDuration);
       }
+      setEditMinutes(clampedMins.toString());
     }
     setIsEditingTime(false);
   };
@@ -229,6 +231,7 @@ export const TimerPage = () => {
                       autoFocus
                       type="number"
                       min="0"
+                      max="1440"
                       value={editMinutes}
                       onChange={(e) => setEditMinutes(e.target.value)}
                       onBlur={() => handleTimeSubmit()}
