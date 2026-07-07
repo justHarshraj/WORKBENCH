@@ -41,7 +41,8 @@ export function LandingPage() {
     // Refresh ScrollTrigger to fix height calculations on mobile
     setTimeout(() => {
       ScrollTrigger.refresh();
-    }, 100);
+      lenis.resize();
+    }, 200);
 
     return () => {
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
