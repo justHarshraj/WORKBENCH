@@ -75,6 +75,7 @@ export function HeroSection() {
           end: 'bottom bottom',
           scrub: 1,
           pin: scene,
+          pinSpacing: false,
           anticipatePin: 1,
         },
       });
