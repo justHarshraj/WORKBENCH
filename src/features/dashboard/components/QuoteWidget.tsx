@@ -506,7 +506,7 @@ export function QuoteWidget() {
           setIsLoading(false);
           return;
         }
-      } catch (e) {
+      } catch {
         // ignore parse error and fetch new
       }
     }
