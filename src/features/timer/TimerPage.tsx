@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore, type TimerMode } from '../../store';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Play, Pause, Square, Save, Timer as TimerIcon, List, Brain, Coffee, Hourglass } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Clock, Timer as TimerIcon, List, Brain, Coffee, Hourglass } from 'lucide-react';
 import { format } from 'date-fns';
 
 export const TimerPage = () => {
@@ -99,19 +99,6 @@ export const TimerPage = () => {
     setTimerIsActive(false);
     setTimerTime(newMode === 'Stopwatch' ? 0 : timerDurations[newMode]);
   };
-
-  const getModeColor = () => {
-    if (timerMode === 'Stopwatch') return 'text-blue-400 border-blue-400/30 bg-blue-400/10 hover:bg-blue-400/20';
-    if (timerMode === 'Timer') return 'text-purple-400 border-purple-400/30 bg-purple-400/10 hover:bg-purple-400/20';
-    if (timerMode === 'Focus') return 'text-accent border-accent/30 bg-accent/10 hover:bg-accent/20';
-    return 'text-warning border-warning/30 bg-warning/10 hover:bg-warning/20';
-  };
-
-  const progress = timerMode === 'Stopwatch' 
-    ? 100 
-    : timerDurations[timerMode] === 0 
-      ? 100 
-      : ((timerDurations[timerMode] - timerTime) / timerDurations[timerMode]) * 100;
 
   return (
     <div className="max-w-5xl mx-auto py-8">
