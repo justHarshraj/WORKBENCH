@@ -283,14 +283,14 @@
 
 .hero-container {
   position: relative;
-  height: 300vh;
+  height: 300dvh;
   /* More room for scroll */
 }
 
 .hero-scene {
   position: relative;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -336,7 +336,7 @@
 /* Katana */
 .hero-katana {
   position: absolute;
-  height: clamp(50vh, 60vh, 70vh);
+  height: clamp(50dvh, 60dvh, 70dvh);
   width: auto;
   object-fit: contain;
   mix-blend-mode: multiply;
@@ -363,7 +363,7 @@
 
 .hero-label {
   position: absolute;
-  top: clamp(80px, 15vh, 140px);
+  top: clamp(80px, 15dvh, 140px);
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-heading);
@@ -379,7 +379,7 @@
 
 .hero-heading {
   position: absolute;
-  bottom: clamp(80px, 15vh, 160px);
+  bottom: clamp(80px, 15dvh, 160px);
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
@@ -426,7 +426,7 @@
 
 .hero-subheading {
   position: absolute;
-  bottom: clamp(100px, 15vh, 160px);
+  bottom: clamp(100px, 15dvh, 160px);
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -509,8 +509,8 @@
 
 .chapter {
   position: relative;
-  padding: 12vh clamp(1.5rem, 6vw, 6rem);
-  min-height: 85vh;
+  padding: 12dvh clamp(1.5rem, 6vw, 6rem);
+  min-height: 85dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -727,7 +727,7 @@
 .editorial-break {
   position: relative;
   width: 100%;
-  height: 50vh;
+  height: 50dvh;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -834,7 +834,7 @@
 
   100% {
     opacity: 0;
-    transform: translate(var(--petal-drift, 80px), calc(100vh + 20px)) rotate(720deg);
+    transform: translate(var(--petal-drift, 80px), calc(100dvh + 20px)) rotate(720deg);
   }
 }
 
@@ -868,5 +868,36 @@
 
   .scroll-indicator {
     animation: none;
+  }
+}
+
+/* ========================================
+   Mobile Responsiveness
+   ======================================== */
+@media (max-width: 768px) {
+  .hero-heading h1 {
+    font-size: clamp(3rem, 12vw, 4rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .word-master, .word-your, .word-mind {
+    margin: 0;
+  }
+  .hero-label {
+    top: clamp(60px, 12dvh, 100px);
+    padding: 0 1rem;
+  }
+  .hero-heading {
+    bottom: clamp(120px, 20dvh, 200px);
+  }
+  .chapter-title {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+  .chapter {
+    padding: 10dvh clamp(1rem, 4vw, 2rem);
+  }
+  .chapter-quote {
+    padding: 1.2rem 1.5rem;
   }
 }

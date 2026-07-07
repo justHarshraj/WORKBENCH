@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import Lenis from 'lenis';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuthStore } from '../auth/store/useAuthStore';
 
 import './landing.css';
@@ -11,6 +13,8 @@ import { CustomCursor } from './components/CustomCursor';
 import { HeroSection } from './components/HeroSection';
 import { ChapterSection } from './components/ChapterSection';
 import { LandingFooter } from './components/LandingFooter';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function LandingPage() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -27,13 +31,15 @@ export function LandingPage() {
     });
     lenisRef.current = lenis;
 
-    const raf = (time: number) => {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    };
-    requestAnimationFrame(raf);
+    lenis.on('scroll', ScrollTrigger.update);
 
-    return () => { 
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove((time) => lenis.raf(time * 1000));
       lenis.destroy();
       lenisRef.current = null;
     };
