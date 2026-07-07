@@ -165,34 +165,15 @@ export const TimerPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column: Clock and Timer */}
-        <div className="lg:col-span-2 space-y-8">
+        {/* Left Column: Timer */}
+        <div className="lg:col-span-2 flex flex-col">
           
-          {/* Live Digital Clock */}
-          <motion.section 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-bg-card border border-border-subtle rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-xl"
-          >
-            {/* Ambient Background Glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none"></div>
-            
-            <Clock className="w-6 h-6 text-accent mb-4 opacity-80" />
-            
-            <div className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tabular-nums">
-              {format(currentTime, 'HH:mm:ss')}
-            </div>
-            <div className="text-lg md:text-xl font-medium text-text-muted mt-2 tracking-wide uppercase">
-              {format(currentTime, 'EEEE, MMMM do')}
-            </div>
-          </motion.section>
-
           {/* Stopwatch / Pomodoro */}
           <motion.section 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-bg-card border border-border-subtle rounded-3xl p-8 shadow-xl relative overflow-hidden"
+            className="bg-bg-card border border-border-subtle rounded-3xl p-8 shadow-xl relative overflow-hidden flex-1 flex flex-col min-h-[500px] justify-between"
           >
             {/* Progress Bar Background */}
             <div 
@@ -223,7 +204,7 @@ export const TimerPage = () => {
               )}
             </div>
 
-            <div className="flex flex-col items-center justify-center py-8 relative z-10">
+            <div className="flex flex-col items-center justify-center py-8 relative z-10 flex-1">
               {isEditingTime && timerMode !== 'Stopwatch' ? (
                 <form onSubmit={handleTimeSubmit} className="flex flex-col items-center mb-12">
                   <div className="flex items-baseline justify-center">
@@ -309,8 +290,31 @@ export const TimerPage = () => {
 
         </div>
 
-        {/* Right Column: History */}
-        <div className="space-y-6">
+        {/* Right Column: Clock and History */}
+        <div className="space-y-6 flex flex-col">
+          
+          {/* Live Digital Clock (Mini Version) */}
+          <motion.section 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-bg-card border border-border-subtle rounded-3xl p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-xl"
+          >
+            {/* Ambient Background Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-accent/5 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div className="flex items-center gap-2 mb-2 relative z-10 opacity-80">
+              <Clock className="w-4 h-4 text-accent" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Current Time</span>
+            </div>
+            
+            <div className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tabular-nums relative z-10">
+              {format(currentTime, 'HH:mm:ss')}
+            </div>
+            <div className="text-sm font-medium text-text-muted mt-1 tracking-wide uppercase relative z-10">
+              {format(currentTime, 'EEEE, MMMM do')}
+            </div>
+          </motion.section>
+
           <motion.section
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
