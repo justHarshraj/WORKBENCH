@@ -44,7 +44,20 @@ export function LandingPage() {
       lenis.resize();
     }, 200);
 
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        ScrollTrigger.refresh();
+        lenis.resize();
+      }, 250);
+    };
+    
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer);
       gsap.ticker.remove((time) => lenis.raf(time * 1000));
       lenis.destroy();
       lenisRef.current = null;

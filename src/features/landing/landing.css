@@ -396,7 +396,7 @@
 .hero-heading h1 {
   font-family: var(--font-heading);
   font-weight: 300;
-  font-size: clamp(3.5rem, 10vw, 8rem); /* Toned down size for readability */
+  font-size: clamp(3rem, 8vw, 6rem); /* Refined fluid clamp */
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -561,7 +561,7 @@
 
 .chapter .kanji {
   font-family: var(--font-jp);
-  font-size: clamp(5rem, 16vw, 10rem);
+  font-size: clamp(4rem, 12vw, 8rem); /* Prevent bleeding on ultra-wide or mobile */
   line-height: 1;
   color: var(--crimson);
   opacity: 0.15; /* Increased opacity */
@@ -635,9 +635,9 @@
 /* Feature cards grid */
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.5rem;
-  max-width: 640px;
+  max-width: 900px; /* Better utilization of tablet/desktop */
   width: 100%;
   margin: 0 auto;
 }
@@ -874,12 +874,30 @@
 }
 
 /* ========================================
-   Mobile Responsiveness
+   Responsive Design System
    ======================================== */
-@media (max-width: 768px) {
-  /* Navbar Overlap Fixes */
+
+/* Tablet & Smaller Desktop (max-width: 1024px) */
+@media (max-width: 1024px) {
   .landing-nav {
-    padding: 0 clamp(1rem, 4vw, 1.5rem);
+    padding: 0 clamp(1.5rem, 4vw, 2rem);
+  }
+  .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    max-width: 700px;
+  }
+  .chapter {
+    padding: 10vh clamp(1.5rem, 4vw, 3rem);
+    min-height: 70vh;
+  }
+}
+
+/* Mobile Devices (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Navbar Adjustments */
+  .landing-nav {
+    padding: 0 1rem;
+    height: 50px;
   }
   .nav-brand {
     font-size: 0.5rem;
@@ -891,9 +909,9 @@
     letter-spacing: 2px;
   }
   
-  /* Hero Text Overlap Fixes */
+  /* Hero Text Adjustments */
   .hero-heading h1 {
-    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    font-size: clamp(2.2rem, 10vw, 3.5rem);
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -907,15 +925,49 @@
     padding: 0 1rem;
   }
   .hero-heading {
-    bottom: clamp(120px, 20vh, 200px);
+    bottom: clamp(100px, 20vh, 180px);
   }
+  
+  /* Chapter Adjustments */
   .chapter-title {
     font-size: clamp(1.8rem, 8vw, 2.5rem);
   }
   .chapter {
-    padding: 10vh clamp(1rem, 4vw, 2rem);
+    padding: 8vh 1rem;
   }
   .chapter-quote {
     padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  /* Kanji Background Scaling */
+  .chapter .kanji {
+    font-size: clamp(4rem, 25vw, 6rem); /* Scale down specifically for mobile so it fits */
+    top: 10%;
+  }
+  
+  /* Features Grid Adjustment */
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .feature-card {
+    padding: 1.5rem;
+  }
+}
+
+/* Tiny Mobile Screens (max-width: 480px) */
+@media (max-width: 480px) {
+  .hero-heading h1 {
+    font-size: clamp(2rem, 12vw, 2.8rem);
+  }
+  .hero-subheading {
+    font-size: 0.75rem;
+    padding: 0 1rem;
+  }
+  .landing-footer {
+    padding: 2rem 1rem;
+  }
+  .chapter .kanji {
+    font-size: clamp(3rem, 20vw, 5rem);
   }
 }
