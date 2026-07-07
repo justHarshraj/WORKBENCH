@@ -1,262 +1,230 @@
-import { Link, Navigate } from 'react-router-dom';
-import { motion, type Variants } from 'framer-motion';
-import { 
-  Calendar, CheckSquare, Timer, Link as LinkIcon, BarChart2, 
-  ArrowRight, Zap, Shield, Sparkles 
-} from 'lucide-react';
-import logoImg from '../../assets/logo.png';
+import { useEffect, useRef } from 'react';
+import { Navigate, Link } from 'react-router-dom';
+import Lenis from 'lenis';
 import { useAuthStore } from '../auth/store/useAuthStore';
 
-const features = [
-  {
-    icon: Calendar,
-    title: 'Day Planner',
-    description: 'Dual-mode timeline & calendar view. Organize your day with drag-and-drop events.',
-    color: 'from-blue-500/20 to-blue-600/5',
-    iconColor: 'text-blue-400',
-    borderColor: 'border-blue-500/20',
-  },
-  {
-    icon: CheckSquare,
-    title: 'Smart Todos',
-    description: 'Priority-based task management with categories, due dates, and progress tracking.',
-    color: 'from-emerald-500/20 to-emerald-600/5',
-    iconColor: 'text-emerald-400',
-    borderColor: 'border-emerald-500/20',
-  },
-  {
-    icon: Timer,
-    title: 'Focus Timer',
-    description: 'Pomodoro-style focus sessions with stopwatch, countdown, and session history.',
-    color: 'from-accent/20 to-accent/5',
-    iconColor: 'text-accent',
-    borderColor: 'border-accent/20',
-  },
-  {
-    icon: LinkIcon,
-    title: 'Link Vault',
-    description: 'Save, categorize, and organize your important links and resources.',
-    color: 'from-purple-500/20 to-purple-600/5',
-    iconColor: 'text-purple-400',
-    borderColor: 'border-purple-500/20',
-  },
-  {
-    icon: BarChart2,
-    title: 'Statistics',
-    description: 'Visualize your productivity with completion charts and focus time analytics.',
-    color: 'from-amber-500/20 to-amber-600/5',
-    iconColor: 'text-amber-400',
-    borderColor: 'border-amber-500/20',
-  },
-  {
-    icon: Shield,
-    title: 'Secure & Personal',
-    description: 'Your data is yours. Authenticated accounts with encrypted storage.',
-    color: 'from-rose-500/20 to-rose-600/5',
-    iconColor: 'text-rose-400',
-    borderColor: 'border-rose-500/20',
-  },
-];
+import './landing.css';
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-};
+import { WashiBackground } from './components/WashiBackground';
+import { LandingNavbar } from './components/LandingNavbar';
+import { CustomCursor } from './components/CustomCursor';
+import { HeroSection } from './components/HeroSection';
+import { ChapterSection } from './components/ChapterSection';
+import { LandingFooter } from './components/LandingFooter';
 
 export function LandingPage() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const lenisRef = useRef<Lenis | null>(null);
+
+  // Lenis smooth scrolling
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const lenis = new Lenis({
+      duration: 1.6,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      touchMultiplier: 1.5,
+    });
+    lenisRef.current = lenis;
+
+    const raf = (time: number) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+
+    return () => { 
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
+  const handleEnterClick = () => {
+    if (lenisRef.current) {
+      // Cinematic slow scroll through the gate animation
+      lenisRef.current.scrollTo('#chapter-1', { 
+        duration: 3.5, 
+        easing: (t: number) => t * (2 - t) // easeOutQuad for a smooth decelerating camera fly-through
+      });
+    } else {
+      const el = document.getElementById('chapter-1');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-bg-app text-text-main overflow-x-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-bg-app/80 backdrop-blur-xl border-b border-border-subtle/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-text-main scale-125 flex-shrink-0" style={{ WebkitMaskImage: `url(${logoImg})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: `url(${logoImg})`, maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }} />
-            <span className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-text-main to-text-muted">
-              WORKBENCH
-            </span>
+    <div className="landing-page">
+      <WashiBackground />
+      <div id="global-pagoda-bg" className="global-pagoda-bg" aria-hidden="true" />
+      <CustomCursor />
+      <LandingNavbar onEnterClick={handleEnterClick} />
+
+      {/* === HERO — Torii Gate & Katana Scroll Journey === */}
+      <HeroSection />
+
+      {/* === CHAPTER I — Sin === */}
+      <div id="chapter-1">
+        <ChapterSection
+        number="I"
+        kanji="罪"
+        title="The Burden of Sin"
+        crimsonWord="Sin"
+        quote="Procrastination is the cardinal sin against your own potential. To conquer the world, you must first conquer your tasks."
+      >
+        <div className="features-grid">
+          <div className="feature-card" data-hoverable>
+            <h3>Smart Todos</h3>
+            <p>Priority-based tasks with categories, due dates, and progress tracking.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-sm font-medium text-text-muted hover:text-text-main transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register"
-              className="px-5 py-2 text-sm font-semibold bg-accent text-white rounded-xl hover:bg-accent-hover transition-colors shadow-lg shadow-accent/20"
-            >
-              Get Started
-            </Link>
+          <div className="feature-card" data-hoverable>
+            <h3>Task Mastery</h3>
+            <p>Break down monumental goals into actionable steps. No objective is left to chance.</p>
           </div>
         </div>
-      </nav>
+      </ChapterSection>
+      </div>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-28 px-4 sm:px-6 relative">
-        {/* Background glow */}
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-accent/8 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute top-40 left-1/4 w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+      {/* === CHAPTER II — Discipline === */}
+      <ChapterSection
+        number="II"
+        kanji="道"
+        title="The Path of Discipline"
+        crimsonWord="Discipline"
+        quote="Chaos is the enemy of greatness. True discipline requires mapping your time before it slips away."
+      >
+        <div className="features-grid">
+          <div className="feature-card" data-hoverable>
+            <h3>Day Planner</h3>
+            <p>Dual-mode timeline & calendar. Organize each day with intention and structure.</p>
+          </div>
+          <div className="feature-card" data-hoverable>
+            <h3>Time Blocking</h3>
+            <p>Allocate specific, unbreakable blocks for deep work and strategic planning.</p>
+          </div>
+        </div>
+      </ChapterSection>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="max-w-4xl mx-auto text-center relative z-10"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-8"
-          >
-            <Sparkles className="w-4 h-4" />
-            Your Personal Productivity OS
-          </motion.div>
+      {/* === CHAPTER III — Pride === */}
+      <ChapterSection
+        number="III"
+        kanji="誇"
+        title="Forging Pride"
+        crimsonWord="Pride"
+        quote="True pride is not given; it is forged in the fires of unbroken focus and deep work."
+      >
+        <div className="features-grid">
+          <div className="feature-card" data-hoverable>
+            <h3>Focus Timer</h3>
+            <p>Pomodoro-style sessions with stopwatch, countdown, and deep work tracking.</p>
+          </div>
+          <div className="feature-card" data-hoverable>
+            <h3>Session History</h3>
+            <p>Review your focus sessions. Understand your patterns. Improve daily.</p>
+          </div>
+        </div>
+      </ChapterSection>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1] mb-6">
-            <span className="bg-clip-text text-transparent bg-gradient-to-b from-text-main via-text-main to-text-muted">
-              Master Your Day.
-            </span>
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-accent via-rose-400 to-blue-400">
-              Own Your Time.
-            </span>
-          </h1>
+      {/* === CHAPTER IV — Wisdom === */}
+      <ChapterSection
+        number="IV"
+        kanji="智"
+        title="Seeking Wisdom"
+        crimsonWord="Wisdom"
+        quote="Wisdom is scattered across the ages. A true master collects, organizes, and reviews their knowledge."
+      >
+        <div className="features-grid">
+          <div className="feature-card" data-hoverable>
+            <h3>Link Vault</h3>
+            <p>Save, categorize, and curate your knowledge resources in one sacred space.</p>
+          </div>
+          <div className="feature-card" data-hoverable>
+            <h3>Knowledge Curation</h3>
+            <p>Tag, search, and instantly retrieve your most critical information exactly when you need it.</p>
+          </div>
+        </div>
+      </ChapterSection>
 
-          <p className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto leading-relaxed mb-10">
-            WORKBENCH brings together a day planner, smart todos, focus timer, link vault, and analytics — 
-            all in one beautifully crafted workspace designed for deep work.
+      {/* === CHAPTER V — Destiny === */}
+      <ChapterSection
+        number="V"
+        kanji="運命"
+        title="Choosing Destiny"
+        crimsonWord="Destiny"
+        quote="You are not a victim of circumstance. Track your growth, visualize your effort, and author your own fate."
+      >
+        <div className="features-grid">
+          <div className="feature-card" data-hoverable>
+            <h3>Statistics</h3>
+            <p>Visualize your growth. Completion charts, focus analytics, and streaks.</p>
+          </div>
+          <div className="feature-card" data-hoverable>
+            <h3>Unbreakable Chains</h3>
+            <p>Watch your consistency forge a relentless chain of daily victories.</p>
+          </div>
+        </div>
+      </ChapterSection>
+
+      {/* Zen divider */}
+      <div className="zen-divider" style={{ height: '60px' }} aria-hidden="true" />
+
+      {/* === CHAPTER VI — Awakening === */}
+      <ChapterSection
+        number="VI"
+        kanji="覚醒"
+        title="The Awakening"
+        crimsonWord="Awakening"
+        quote="The tools are laid out before you. The path is clear. Are you ready to claim your destiny?"
+      >
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '2rem',
+          marginTop: '2rem',
+        }}>
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '0.9rem',
+            color: 'var(--ink-light)',
+            textAlign: 'center',
+            maxWidth: '450px',
+            lineHeight: 1.8,
+            fontWeight: 300,
+          }}>
+            Your dojo awaits. A workspace crafted for the protagonist of this story—you. Refuse to be ordinary.
           </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/register"
-              className="group px-8 py-3.5 text-base font-semibold bg-accent text-white rounded-2xl hover:bg-accent-hover transition-all shadow-xl shadow-accent/25 hover:shadow-accent/35 flex items-center gap-2 w-full sm:w-auto justify-center"
-            >
-              Start Building
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+            <Link to="/register" className="btn-landing btn-landing--solid" data-hoverable>
+              Enter the Dojo
             </Link>
-            <Link
-              to="/login"
-              className="px-8 py-3.5 text-base font-medium bg-bg-card text-text-main rounded-2xl border border-border-subtle hover:border-text-muted transition-colors w-full sm:w-auto text-center"
+            <button 
+              onClick={() => {
+                if (lenisRef.current) {
+                  lenisRef.current.scrollTo(0, { 
+                    duration: 3, 
+                    easing: (t) => t * (2 - t) 
+                  });
+                } else {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              className="btn-landing btn-landing--frosted" 
+              data-hoverable
             >
-              I Have an Account
-            </Link>
+              Return
+            </button>
           </div>
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 md:py-28 px-4 sm:px-6 relative">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-16"
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bg-card border border-border-subtle text-text-muted text-xs font-medium uppercase tracking-wider mb-4">
-              <Zap className="w-3 h-3 text-accent" />
-              Features
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-text-main mb-4">
-              Everything You Need to
-              <span className="text-accent"> Focus</span>
-            </h2>
-            <p className="text-text-muted max-w-lg mx-auto">
-              Six powerful modules, one unified workspace. Built for people who take their productivity seriously.
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-50px' }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-          >
-            {features.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={itemVariants}
-                className={`group relative bg-bg-card rounded-2xl border ${feature.borderColor} p-6 hover:border-text-muted/30 transition-all duration-300 overflow-hidden`}
-              >
-                {/* Gradient background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-
-                <div className="relative z-10">
-                  <div className={`w-10 h-10 rounded-xl bg-bg-app border border-border-subtle flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className={`w-5 h-5 ${feature.iconColor}`} />
-                  </div>
-                  <h3 className="text-lg font-semibold text-text-main mb-2">{feature.title}</h3>
-                  <p className="text-sm text-text-muted leading-relaxed">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
-      </section>
+      </ChapterSection>
 
-      {/* CTA Section */}
-      <section className="py-20 md:py-28 px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.5 }}
-          className="max-w-3xl mx-auto text-center"
-        >
-          <div className="bg-bg-card rounded-3xl border border-border-subtle p-10 md:p-14 relative overflow-hidden">
-            {/* Decorative glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[200px] bg-accent/10 rounded-full blur-[80px] pointer-events-none" />
-            
-            <div className="relative z-10">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-text-main mb-4">
-                Ready to Build Your Routine?
-              </h2>
-              <p className="text-text-muted mb-8 max-w-md mx-auto">
-                Join WORKBENCH and start organizing your days, tracking your focus, and achieving your goals.
-              </p>
-              <Link
-                to="/register"
-                className="group inline-flex items-center gap-2 px-8 py-3.5 text-base font-semibold bg-accent text-white rounded-2xl hover:bg-accent-hover transition-all shadow-xl shadow-accent/25"
-              >
-                Get Started — It's Free
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+      {/* Breathing space */}
+      <div style={{ height: '6vh' }} aria-hidden="true" />
 
-      {/* Footer */}
-      <footer className="border-t border-border-subtle py-8 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-text-main scale-125 flex-shrink-0" style={{ WebkitMaskImage: `url(${logoImg})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: `url(${logoImg})`, maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }} />
-            <span className="text-sm font-semibold text-text-muted">WORKBENCH</span>
-          </div>
-          <p className="text-xs text-text-muted">
-            Built with The Harsh Method · © {new Date().getFullYear()}
-          </p>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

@@ -36,6 +36,11 @@ app.get('/api/tasks', async (req: AuthRequest, res) => {
     });
     res.json(tasks);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Fetch tasks error:', error);
     res.status(500).json({ error: 'Failed to fetch tasks' });
   }
@@ -56,6 +61,11 @@ app.post('/api/tasks', async (req: AuthRequest, res): Promise<void> => {
     });
     res.status(201).json(newTask);
   } catch (error: any) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Create task error:', error);
     res.status(500).json({ error: 'Failed to create task', details: error.message, stack: error.stack });
   }
@@ -79,6 +89,11 @@ app.put('/api/tasks/:id', async (req: AuthRequest, res) => {
     });
     res.json(updatedTask);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Update task error:', error);
     res.status(500).json({ error: 'Failed to update task' });
   }
@@ -90,6 +105,11 @@ app.delete('/api/tasks/:id', async (req: AuthRequest, res) => {
     await prisma.task.delete({ where: { id, userId: req.user!.id } });
     res.status(204).send();
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Delete task error:', error);
     res.status(500).json({ error: 'Failed to delete task' });
   }
@@ -105,6 +125,11 @@ app.get('/api/events', async (req: AuthRequest, res) => {
     });
     res.json(events);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Fetch events error:', error);
     res.status(500).json({ error: 'Failed to fetch events' });
   }
@@ -124,6 +149,11 @@ app.post('/api/events', async (req: AuthRequest, res): Promise<void> => {
     });
     res.status(201).json(newEvent);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Create event error:', error);
     res.status(500).json({ error: 'Failed to create event' });
   }
@@ -144,6 +174,11 @@ app.put('/api/events/:id', async (req: AuthRequest, res) => {
     });
     res.json(updatedEvent);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Update event error:', error);
     res.status(500).json({ error: 'Failed to update event' });
   }
@@ -155,6 +190,11 @@ app.delete('/api/events/:id', async (req: AuthRequest, res) => {
     await prisma.event.delete({ where: { id, userId: req.user!.id } });
     res.status(204).send();
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Delete event error:', error);
     res.status(500).json({ error: 'Failed to delete event' });
   }
@@ -170,6 +210,11 @@ app.get('/api/time-sessions', async (req: AuthRequest, res) => {
     });
     res.json(sessions);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Fetch time sessions error:', error);
     res.status(500).json({ error: 'Failed to fetch time sessions' });
   }
@@ -189,6 +234,11 @@ app.post('/api/time-sessions', async (req: AuthRequest, res): Promise<void> => {
     });
     res.status(201).json(newSession);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Create time session error:', error);
     res.status(500).json({ error: 'Failed to create time session' });
   }
@@ -200,6 +250,11 @@ app.delete('/api/time-sessions/:id', async (req: AuthRequest, res) => {
     await prisma.timeSession.delete({ where: { id, userId: req.user!.id } });
     res.status(204).send();
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Delete time session error:', error);
     res.status(500).json({ error: 'Failed to delete time session' });
   }
@@ -215,6 +270,11 @@ app.get('/api/links', async (req: AuthRequest, res) => {
     });
     res.json(links);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Fetch links error:', error);
     res.status(500).json({ error: 'Failed to fetch links' });
   }
@@ -234,6 +294,11 @@ app.post('/api/links', async (req: AuthRequest, res): Promise<void> => {
     });
     res.status(201).json(newLink);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Create link error:', error);
     res.status(500).json({ error: 'Failed to create link' });
   }
@@ -245,6 +310,11 @@ app.delete('/api/links/:id', async (req: AuthRequest, res) => {
     await prisma.link.delete({ where: { id, userId: req.user!.id } });
     res.status(204).send();
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Delete link error:', error);
     res.status(500).json({ error: 'Failed to delete link' });
   }
@@ -262,6 +332,11 @@ app.get('/api/settings', async (req: AuthRequest, res) => {
     }
     res.json(settings);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Fetch settings error:', error);
     res.status(500).json({ error: 'Failed to fetch settings' });
   }
@@ -288,9 +363,19 @@ app.put('/api/settings', async (req: AuthRequest, res) => {
     }
     res.json(settings);
   } catch (error) {
+    if (error && (error as any).code === 'P2025') {
+      res.status(404).json({ error: 'Record not found' });
+      return;
+    }
+
     console.error('Update settings error:', error);
     res.status(500).json({ error: 'Failed to update settings' });
   }
+});
+
+// Global 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
 // Start Server

@@ -38,7 +38,7 @@ function App() {
     if (isAuthenticated) {
       setIsDataReady(false);
       fetchInitialData().finally(() => {
-        setTimeout(() => setIsDataReady(true), 500);
+        setIsDataReady(true);
       });
     }
   }, [checkDailyReset, fetchInitialData, isAuthenticated]);

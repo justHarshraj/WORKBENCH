@@ -81,25 +81,41 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
 router.post('/google', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { credential } = req.body;
+    const { credential, access_token } = req.body;
 
-    if (!credential) {
-      res.status(400).json({ error: 'Google credential is required' });
+    if (!credential && !access_token) {
+      res.status(400).json({ error: 'Google credential or access_token is required' });
       return;
     }
 
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID!,
-    });
-    
-    const payload = ticket.getPayload();
+    let payload: any = null;
+
+    if (credential) {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID!,
+      });
+      payload = ticket.getPayload();
+    } else if (access_token) {
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      if (!userInfoRes.ok) {
+        res.status(400).json({ error: 'Failed to fetch user info with access token' });
+        return;
+      }
+      payload = await userInfoRes.json();
+    }
+
     if (!payload || !payload.email) {
       res.status(400).json({ error: 'Invalid Google token payload' });
       return;
     }
 
-    const { sub: googleId, email, name, picture: avatar } = payload;
+    const email = payload.email;
+    const name = payload.name;
+    const avatar = payload.picture || payload.avatar;
+    const googleId = payload.sub;
 
     let user = await prisma.user.findUnique({ where: { email } });
 

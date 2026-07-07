@@ -8,4 +8,15 @@ export default defineConfig({
     tailwindcss(),
     react()
   ],
+  server: {
+    fs: {
+      deny: ['venv'],
+    },
+    watch: {
+      ignored: ['**/venv/**'],
+    },
+  },
+  optimizeDeps: {
+    entries: ['index.html'],
+  },
 })

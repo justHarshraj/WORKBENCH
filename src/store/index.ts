@@ -12,6 +12,15 @@ const getAuthHeaders = () => {
   };
 };
 
+const apiFetch = async (url: string, options?: RequestInit) => {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    useAuthStore.getState().logout();
+    throw new Error('Unauthorized');
+  }
+  return res;
+};
+
 export interface Todo {
   id: string;
   title: string;
@@ -140,11 +149,11 @@ export const useAppStore = create<AppState>()((set) => ({
   fetchInitialData: async () => {
     try {
       const [todosRes, eventsRes, linksRes, sessionsRes, settingsRes] = await Promise.all([
-        fetch(`${API_URL}/tasks`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/events`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/links`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/time-sessions`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/settings`, { headers: getAuthHeaders() })
+        apiFetch(`${API_URL}/tasks`, { headers: getAuthHeaders() }),
+        apiFetch(`${API_URL}/events`, { headers: getAuthHeaders() }),
+        apiFetch(`${API_URL}/links`, { headers: getAuthHeaders() }),
+        apiFetch(`${API_URL}/time-sessions`, { headers: getAuthHeaders() }),
+        apiFetch(`${API_URL}/settings`, { headers: getAuthHeaders() })
       ]);
 
       if (!todosRes.ok || !eventsRes.ok || !linksRes.ok || !sessionsRes.ok || !settingsRes.ok) {
@@ -163,6 +172,20 @@ export const useAppStore = create<AppState>()((set) => ({
   },
 
   checkDailyReset: () => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastLogin = localStorage.getItem('workbench_last_login_date');
+    
+    if (lastLogin !== today) {
+      const state = useAppStore.getState();
+      const dailyTasks = state.todos.filter(t => t.category === 'Daily' && t.completed);
+      
+      dailyTasks.forEach(task => {
+        state.updateTodo(task.id, { completed: false, status: 'Todo' });
+      });
+      
+      localStorage.setItem('workbench_last_login_date', today);
+      set({ lastLoginDate: today });
+    }
   },
 
   // Settings
@@ -174,7 +197,7 @@ export const useAppStore = create<AppState>()((set) => ({
     });
     
     try {
-      const res = await fetch(`${API_URL}/settings`, {
+      const res = await apiFetch(`${API_URL}/settings`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
@@ -194,7 +217,7 @@ export const useAppStore = create<AppState>()((set) => ({
     const tempTodo = { ...todo, id: tempId, createdAt: new Date().toISOString() } as Todo;
     set((state) => ({ todos: [tempTodo, ...state.todos] }));
     try {
-      const res = await fetch(`${API_URL}/tasks`, {
+      const res = await apiFetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(todo),
@@ -214,7 +237,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { todos: state.todos.map(t => t.id === id ? { ...t, ...updates } as Todo : t) };
     });
     try {
-      const res = await fetch(`${API_URL}/tasks/${id}`, {
+      const res = await apiFetch(`${API_URL}/tasks/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
@@ -232,7 +255,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { todos: state.todos.filter(t => t.id !== id) };
     });
     try {
-      const res = await fetch(`${API_URL}/tasks/${id}`, { 
+      const res = await apiFetch(`${API_URL}/tasks/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -249,7 +272,7 @@ export const useAppStore = create<AppState>()((set) => ({
     const tempEvent = { ...event, id: tempId, createdAt: new Date().toISOString() } as DayEvent;
     set((state) => ({ events: [tempEvent, ...state.events] }));
     try {
-      const res = await fetch(`${API_URL}/events`, {
+      const res = await apiFetch(`${API_URL}/events`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(event),
@@ -269,7 +292,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { events: state.events.map(e => e.id === id ? { ...e, ...updates } as DayEvent : e) };
     });
     try {
-      const res = await fetch(`${API_URL}/events/${id}`, {
+      const res = await apiFetch(`${API_URL}/events/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
@@ -287,7 +310,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { events: state.events.filter(e => e.id !== id) };
     });
     try {
-      const res = await fetch(`${API_URL}/events/${id}`, { 
+      const res = await apiFetch(`${API_URL}/events/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -304,7 +327,7 @@ export const useAppStore = create<AppState>()((set) => ({
     const tempLink = { ...link, id: tempId, createdAt: new Date().toISOString() } as LinkItem;
     set((state) => ({ links: [tempLink, ...state.links] }));
     try {
-      const res = await fetch(`${API_URL}/links`, {
+      const res = await apiFetch(`${API_URL}/links`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(link),
@@ -324,7 +347,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { links: state.links.map(l => l.id === id ? { ...l, ...updates } as LinkItem : l) };
     });
     try {
-      const res = await fetch(`${API_URL}/links/${id}`, {
+      const res = await apiFetch(`${API_URL}/links/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updates),
@@ -342,7 +365,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { links: state.links.filter(l => l.id !== id) };
     });
     try {
-      const res = await fetch(`${API_URL}/links/${id}`, { 
+      const res = await apiFetch(`${API_URL}/links/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -359,7 +382,7 @@ export const useAppStore = create<AppState>()((set) => ({
     const tempSession = { ...session, id: tempId, createdAt: new Date().toISOString() } as TimeSession;
     set((state) => ({ timeSessions: [tempSession, ...state.timeSessions] }));
     try {
-      const res = await fetch(`${API_URL}/time-sessions`, {
+      const res = await apiFetch(`${API_URL}/time-sessions`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(session),
