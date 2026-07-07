@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { useAppStore } from '../../store';
-import { Focus, Menu } from 'lucide-react';
-import logoImg from '../../assets/logo.png';
+import { Focus, Menu, Hexagon } from 'lucide-react';
 
 export function AppLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,7 +67,7 @@ export function AppLayout() {
         {!settings?.focusMode && (
           <header className="md:hidden flex items-center justify-between p-4 border-b border-border-subtle bg-bg-app shrink-0 z-10">
             <div className="flex items-center gap-2">
-              <img src={logoImg} alt="Workbench Logo" className="w-6 h-6 rounded-md object-cover border border-border-subtle" />
+              <Hexagon className="w-6 h-6 text-text-main" strokeWidth={1.5} />
               <span className="font-bold tracking-tight text-text-main">WORKBENCH</span>
             </div>
             <button 

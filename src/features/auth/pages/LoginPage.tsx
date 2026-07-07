@@ -4,8 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/useAuthStore';
 import { API_URL } from '../../../store';
-import logoImg from '../../../assets/logo.png';
-import { LogIn, Mail, Lock } from 'lucide-react';
+import { LogIn, Mail, Lock, Hexagon } from 'lucide-react';
 import { DBZLoader } from '../../../components/DBZLoader';
 
 export const LoginPage = () => {
@@ -82,7 +81,7 @@ export const LoginPage = () => {
       >
         <div className="bg-bg-card p-8 rounded-2xl border border-border-subtle shadow-2xl backdrop-blur-sm min-h-[460px] flex flex-col justify-center relative overflow-hidden">
           <div className="flex justify-center mb-6">
-            <img src={logoImg} alt="Workbench Logo" className="w-14 h-14 rounded-xl object-cover border border-border-subtle shadow-md" />
+            <Hexagon className="w-14 h-14 text-text-main" strokeWidth={1} />
           </div>
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome Back</h1>
