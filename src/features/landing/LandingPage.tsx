@@ -84,7 +84,7 @@ export function LandingPage() {
       <nav className="fixed top-0 w-full z-50 bg-bg-app/80 backdrop-blur-xl border-b border-border-subtle/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="Workbench Logo" className="w-8 h-8 object-contain drop-shadow-md" />
+            <img src={logoImg} alt="Workbench Logo" className="w-8 h-8 rounded-lg object-cover border border-border-subtle shadow-sm" />
             <span className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-text-main to-text-muted">
               WORKBENCH
             </span>
@@ -249,7 +249,7 @@ export function LandingPage() {
       <footer className="border-t border-border-subtle py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src={logoImg} alt="Workbench Logo" className="w-6 h-6 object-contain drop-shadow-sm" />
+            <img src={logoImg} alt="Workbench Logo" className="w-6 h-6 rounded-md object-cover border border-border-subtle" />
             <span className="text-sm font-semibold text-text-muted">WORKBENCH</span>
           </div>
           <p className="text-xs text-text-muted">

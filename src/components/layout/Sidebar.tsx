@@ -54,7 +54,7 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
       )}>
       <div className="h-16 flex items-center px-6 border-b border-border-subtle">
         <h1 className="text-xl font-bold tracking-tight text-text-main flex items-center gap-3">
-          <img src={logoImg} alt="Workbench Logo" className="w-10 h-10 object-contain drop-shadow-md" />
+          <img src={logoImg} alt="Workbench Logo" className="w-8 h-8 rounded-lg object-cover border border-border-subtle shadow-sm" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-text-main to-text-muted">
             WORKBENCH
           </span>

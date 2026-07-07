@@ -68,7 +68,7 @@ export function AppLayout() {
         {!settings?.focusMode && (
           <header className="md:hidden flex items-center justify-between p-4 border-b border-border-subtle bg-bg-app shrink-0 z-10">
             <div className="flex items-center gap-2">
-              <img src={logoImg} alt="Workbench Logo" className="w-6 h-6 object-contain" />
+              <img src={logoImg} alt="Workbench Logo" className="w-6 h-6 rounded-md object-cover border border-border-subtle" />
               <span className="font-bold tracking-tight text-text-main">WORKBENCH</span>
             </div>
             <button 
