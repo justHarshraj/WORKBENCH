@@ -83,7 +83,7 @@ export const RegisterPage = () => {
       >
         <div className="bg-bg-card p-8 rounded-2xl border border-border-subtle shadow-2xl backdrop-blur-sm min-h-[500px] flex flex-col justify-center relative overflow-hidden">
           <div className="flex justify-center mb-6">
-            <img src={logoImg} alt="Workbench Logo" className="w-16 h-16 object-contain scale-[1.35] mix-blend-multiply grayscale contrast-150 dark:mix-blend-screen dark:invert" />
+            <div className="w-16 h-16 bg-text-main scale-[1.35] flex-shrink-0" style={{ WebkitMaskImage: `url(${logoImg})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: `url(${logoImg})`, maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }} />
           </div>
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight mb-2">Create Account</h1>

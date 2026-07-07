@@ -84,7 +84,7 @@ export function LandingPage() {
       <nav className="fixed top-0 w-full z-50 bg-bg-app/80 backdrop-blur-xl border-b border-border-subtle/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="Workbench Logo" className="w-10 h-10 object-contain scale-125 mix-blend-multiply grayscale contrast-150 dark:mix-blend-screen dark:invert" />
+            <div className="w-10 h-10 bg-text-main scale-125 flex-shrink-0" style={{ WebkitMaskImage: `url(${logoImg})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: `url(${logoImg})`, maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }} />
             <span className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-text-main to-text-muted">
               WORKBENCH
             </span>
@@ -249,7 +249,7 @@ export function LandingPage() {
       <footer className="border-t border-border-subtle py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src={logoImg} alt="Workbench Logo" className="w-8 h-8 object-contain scale-125 mix-blend-multiply grayscale contrast-150 dark:mix-blend-screen dark:invert" />
+            <div className="w-8 h-8 bg-text-main scale-125 flex-shrink-0" style={{ WebkitMaskImage: `url(${logoImg})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: `url(${logoImg})`, maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }} />
             <span className="text-sm font-semibold text-text-muted">WORKBENCH</span>
           </div>
           <p className="text-xs text-text-muted">

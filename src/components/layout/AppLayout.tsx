@@ -68,7 +68,7 @@ export function AppLayout() {
         {!settings?.focusMode && (
           <header className="md:hidden flex items-center justify-between p-4 border-b border-border-subtle bg-bg-app shrink-0 z-10">
             <div className="flex items-center gap-2">
-              <img src={logoImg} alt="Workbench Logo" className="w-8 h-8 object-contain scale-125 mix-blend-multiply grayscale contrast-150 dark:mix-blend-screen dark:invert" />
+              <div className="w-8 h-8 bg-text-main scale-125 flex-shrink-0" style={{ WebkitMaskImage: `url(${logoImg})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskImage: `url(${logoImg})`, maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center' }} />
               <span className="font-bold tracking-tight text-text-main">WORKBENCH</span>
             </div>
             <button 
