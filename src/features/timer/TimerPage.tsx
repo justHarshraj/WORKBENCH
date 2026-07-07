@@ -214,7 +214,7 @@ export const TimerPage = () => {
               {!timerIsActive ? (
                 <button 
                   onClick={handleStart}
-                  className="px-8 py-2.5 rounded-full bg-text-main text-bg-main font-semibold text-sm hover:opacity-90 transition-opacity"
+                  className="px-8 py-2.5 rounded-full bg-text-main text-bg-app font-semibold text-sm hover:opacity-90 transition-opacity"
                 >
                   Start
                 </button>
