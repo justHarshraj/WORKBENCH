@@ -26,6 +26,30 @@ app.use('/api/auth', authRoutes);
 // Protect all routes below this middleware
 app.use('/api', authMiddleware);
 
+// --- Initial Data API (Aggregated) ---
+app.get('/api/initial-data', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    const [tasks, events, links, timeSessions, existingSettings] = await Promise.all([
+      prisma.task.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
+      prisma.event.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
+      prisma.link.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
+      prisma.timeSession.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
+      prisma.settings.findUnique({ where: { userId } })
+    ]);
+
+    let settings = existingSettings;
+    if (!settings) {
+      settings = await prisma.settings.create({ data: { userId } });
+    }
+
+    res.json({ tasks, events, links, timeSessions, settings });
+  } catch (error) {
+    console.error('Fetch initial data error:', error);
+    res.status(500).json({ error: 'Failed to fetch initial data' });
+  }
+});
+
 // --- Tasks API ---
 
 app.get('/api/tasks', async (req: AuthRequest, res) => {

@@ -148,24 +148,20 @@ export const useAppStore = create<AppState>()((set) => ({
   
   fetchInitialData: async () => {
     try {
-      const [todosRes, eventsRes, linksRes, sessionsRes, settingsRes] = await Promise.all([
-        apiFetch(`${API_URL}/tasks`, { headers: getAuthHeaders() }),
-        apiFetch(`${API_URL}/events`, { headers: getAuthHeaders() }),
-        apiFetch(`${API_URL}/links`, { headers: getAuthHeaders() }),
-        apiFetch(`${API_URL}/time-sessions`, { headers: getAuthHeaders() }),
-        apiFetch(`${API_URL}/settings`, { headers: getAuthHeaders() })
-      ]);
+      const res = await apiFetch(`${API_URL}/initial-data`, { headers: getAuthHeaders() });
 
-      if (!todosRes.ok || !eventsRes.ok || !linksRes.ok || !sessionsRes.ok || !settingsRes.ok) {
-        throw new Error('One or more API requests failed');
+      if (!res.ok) {
+        throw new Error('Initial data API request failed');
       }
 
-      const todos = await todosRes.json();
-      const events = await eventsRes.json();
-      const links = await linksRes.json();
-      const timeSessions = await sessionsRes.json();
-      const settings = await settingsRes.json();
-      set({ todos, events, links, timeSessions, settings });
+      const data = await res.json();
+      set({ 
+        todos: data.tasks, 
+        events: data.events, 
+        links: data.links, 
+        timeSessions: data.timeSessions, 
+        settings: data.settings 
+      });
     } catch (e) {
       console.error('Failed to fetch initial data', e);
     }
