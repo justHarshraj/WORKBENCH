@@ -101,6 +101,11 @@ html, body {
   overscroll-behavior: none;
 }
 
+/* Make BlockNote blend seamlessly into the page background like Notion */
+.bn-container {
+  background-color: transparent !important;
+}
+
 /* Fix BlockNote UI disappearing or becoming unclickable due to Tailwind CSS */
 .mantine-Popover-dropdown,
 .mantine-Menu-dropdown {

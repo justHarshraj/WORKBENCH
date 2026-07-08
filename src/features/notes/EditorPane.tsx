@@ -25,15 +25,23 @@ const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
         if (!id) return;
         
         // Use the internal tiptap state to avoid 'no active cursor' errors
-        const block = editor.document.find((b: any) => b.id === id);
+        const block = editor.getBlock(id);
         if (block) {
           editor.insertBlocks([{ type: 'paragraph' }], block, 'after');
           setTimeout(() => {
-            const blocks = editor.document;
-            const idx = blocks.findIndex((b: any) => b.id === block.id);
-            if (idx !== -1 && blocks[idx + 1]) {
-              editor.setTextCursorPosition(blocks[idx + 1], 'start');
-              editor.focus();
+            // Find the next block in the editor to focus it
+            const nextBlock = editor.getTextCursorPosition()?.block;
+            if (nextBlock) {
+               // We might already be focused from BlockNote's internal insert logic
+               editor.focus();
+            } else {
+               // Manually try to find it (rough fallback)
+               const doc = editor.document;
+               const idx = doc.findIndex((b: any) => b.id === block.id);
+               if (idx !== -1 && doc[idx + 1]) {
+                 editor.setTextCursorPosition(doc[idx + 1], 'start');
+                 editor.focus();
+               }
             }
           }, 50);
         }
