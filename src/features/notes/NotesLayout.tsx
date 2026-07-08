@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../../store';
 import { Plus, FileText, ChevronRight, ChevronDown, Trash2 } from 'lucide-react';
-import { PageEditor } from './PageEditor';
+import { EditorPane } from './EditorPane';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -14,6 +14,18 @@ export const NotesLayout = () => {
   const topLevelPages = pages.filter(p => !p.parentId);
   const [activePageId, setActivePageId] = useState<string | null>(topLevelPages.length > 0 ? topLevelPages[0].id : null);
   const [expandedPages, setExpandedPages] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const currentTopLevel = pages.filter(p => !p.parentId);
+    const firstTopLevelId = currentTopLevel.length > 0 ? currentTopLevel[0].id : null;
+
+    if (!activePageId && firstTopLevelId) {
+      setActivePageId(firstTopLevelId);
+    } else if (activePageId && !pages.some(p => p.id === activePageId)) {
+      // Fallback if active page was deleted
+      setActivePageId(firstTopLevelId);
+    }
+  }, [pages, activePageId]);
 
   const handleCreatePage = async (parentId: string | null = null) => {
     const newPage = await addPage({ title: '', parentId });
@@ -60,7 +72,7 @@ export const NotesLayout = () => {
                   {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </button>
               ) : (
-                <div className="w-4.5 h-4.5" /> // Spacer
+                <div className="w-[18px] h-[18px]" /> // Spacer
               )}
               {page.icon ? (
                 <span className="w-4 h-4 text-center text-xs leading-none">{page.icon}</span>
@@ -118,7 +130,7 @@ export const NotesLayout = () => {
       {/* Secondary Sidebar for Pages */}
       <div className="w-64 border-r border-border-subtle bg-[#1C1C1E]/50 flex flex-col h-full flex-shrink-0 backdrop-blur-md">
         <div className="p-4 flex items-center justify-between">
-          <h2 className="font-semibold text-text-main text-sm uppercase tracking-wider text-text-muted">Private Pages</h2>
+          <h2 className="font-semibold text-sm uppercase tracking-wider text-text-muted">Private Pages</h2>
           <button 
             onClick={() => handleCreatePage(null)}
             className="p-1 rounded-md hover:bg-bg-hover text-text-muted hover:text-text-main transition-colors"
@@ -147,7 +159,7 @@ export const NotesLayout = () => {
       {/* Main Content Area */}
       <div className="flex-1 h-full overflow-y-auto bg-bg-app relative">
         {activePageId ? (
-          <PageEditor key={activePageId} pageId={activePageId} />
+          <EditorPane key={activePageId} pageId={activePageId} />
         ) : (
           <div className="h-full flex items-center justify-center text-text-muted flex-col bg-bg-app/50 backdrop-blur-sm">
             <FileText className="w-16 h-16 mb-4 opacity-10" />
@@ -158,3 +170,4 @@ export const NotesLayout = () => {
     </div>
   );
 };
+

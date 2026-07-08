@@ -450,10 +450,18 @@ export const useAppStore = create<AppState>()((set) => ({
     }
   },
   deletePage: async (id) => {
-    let originalPage: Page | undefined;
+    let originalPages: Page[] = [];
     set((state) => {
-      originalPage = state.pages.find(p => p.id === id);
-      return { pages: state.pages.filter(p => p.id !== id) };
+      originalPages = [...state.pages];
+      
+      // Recursively find all child pages to remove them optimistically
+      const getDescendantIds = (parentId: string): string[] => {
+        const children = state.pages.filter(p => p.parentId === parentId);
+        return [parentId, ...children.flatMap(c => getDescendantIds(c.id))];
+      };
+      
+      const idsToDelete = getDescendantIds(id);
+      return { pages: state.pages.filter(p => !idsToDelete.includes(p.id)) };
     });
     try {
       const res = await apiFetch(`${API_URL}/pages/${id}`, { 
@@ -463,7 +471,7 @@ export const useAppStore = create<AppState>()((set) => ({
       if (!res.ok) throw new Error('Failed to delete page');
     } catch (e) {
       console.error(e);
-      if (originalPage) set((state) => ({ pages: [...state.pages, originalPage!] }));
+      set({ pages: originalPages });
     }
   }
 }));

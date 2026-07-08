@@ -8,11 +8,11 @@ import { Image, Smile } from 'lucide-react';
 import { API_URL } from '../../store';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 
-interface PageEditorProps {
+interface EditorPaneProps {
   pageId: string;
 }
 
-export const PageEditor = ({ pageId }: PageEditorProps) => {
+export const EditorPane = ({ pageId }: EditorPaneProps) => {
   const pages = useAppStore((state) => state.pages);
   const updatePage = useAppStore((state) => state.updatePage);
   const token = useAuthStore((state) => state.token);
@@ -192,3 +192,4 @@ export const PageEditor = ({ pageId }: PageEditorProps) => {
     </div>
   );
 };
+
