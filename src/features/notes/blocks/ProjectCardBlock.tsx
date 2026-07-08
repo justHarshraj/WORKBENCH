@@ -29,7 +29,7 @@ export const ProjectCardBlock = createReactBlockSpec(
     render: (props) => {
       return (
         <div 
-          className="w-full max-w-2xl border border-border-subtle rounded-md p-3 flex gap-3 bg-bg-card hover:bg-bg-card-hover transition-colors cursor-pointer select-none"
+          className="w-full max-w-2xl border border-border-subtle rounded-md p-3 flex gap-3 bg-bg-card hover:bg-bg-card-hover transition-colors cursor-pointer select-none my-3"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

@@ -51,7 +51,8 @@ const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
         }
 
         if (block) {
-          editor.insertBlocks([{ type: 'paragraph' }], block, 'after');
+          const typeToInsert = block.type === 'projectCard' ? 'projectCard' : 'paragraph';
+          editor.insertBlocks([{ type: typeToInsert }], block, 'after');
           setTimeout(() => {
             // Find the next block in the editor to focus it
             const nextBlock = editor.getTextCursorPosition()?.block;
