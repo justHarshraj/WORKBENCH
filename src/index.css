@@ -100,3 +100,23 @@ body {
 html, body {
   overscroll-behavior: none;
 }
+
+/* Fix BlockNote UI disappearing or becoming unclickable due to Tailwind CSS */
+.mantine-Popover-dropdown,
+.mantine-Menu-dropdown {
+  z-index: 99999 !important;
+  background-color: var(--theme-bg-card) !important;
+  border: 1px solid var(--theme-border-subtle) !important;
+}
+
+.mantine-Menu-item {
+  color: var(--theme-text-main) !important;
+}
+.mantine-Menu-item:hover {
+  background-color: var(--theme-bg-card-hover) !important;
+}
+
+.bn-side-menu button {
+  cursor: pointer;
+  background-color: transparent !important;
+}
