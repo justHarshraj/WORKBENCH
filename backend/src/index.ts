@@ -36,10 +36,9 @@ app.get('/api/initial-data', async (req: AuthRequest, res) => {
       prisma.link.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
       prisma.timeSession.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } }),
       prisma.settings.findUnique({ where: { userId } }),
-      prisma.page.findMany({ 
-        where: { userId }, 
+      prisma.block.findMany({ 
+        where: { userId, type: 'page' }, 
         orderBy: { createdAt: 'desc' },
-        select: { id: true, title: true, icon: true, coverImage: true, parentId: true, createdAt: true, updatedAt: true, userId: true } 
       })
     ]);
 
@@ -402,14 +401,14 @@ app.put('/api/settings', async (req: AuthRequest, res) => {
   }
 });
 
-// --- Pages API ---
+// --- Blocks API ---
+import { generateKeyBetween } from 'fractional-indexing';
 
-app.get('/api/pages', async (req: AuthRequest, res) => {
+app.get('/api/blocks/pages', async (req: AuthRequest, res) => {
   try {
-    const pages = await prisma.page.findMany({
-      where: { userId: req.user!.id },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true, icon: true, coverImage: true, parentId: true, createdAt: true, updatedAt: true, userId: true }
+    const pages = await prisma.block.findMany({
+      where: { userId: req.user!.id, type: 'page' },
+      orderBy: { rank: 'asc' },
     });
     res.json(pages);
   } catch (error) {
@@ -418,78 +417,174 @@ app.get('/api/pages', async (req: AuthRequest, res) => {
   }
 });
 
-app.get('/api/pages/:id', async (req: AuthRequest, res) => {
+app.get('/api/blocks/:parentId/children', async (req: AuthRequest, res) => {
   try {
-    const id = req.params.id as string;
-    const page = await prisma.page.findUnique({
-      where: { id, userId: req.user!.id }
+    const parentIdParam = req.params.parentId as string;
+    const parentId = parentIdParam === 'root' ? null : parentIdParam;
+    const blocks = await prisma.block.findMany({
+      where: { userId: req.user!.id, parentId },
+      orderBy: { rank: 'asc' }
     });
-    if (!page) {
-      res.status(404).json({ error: 'Page not found' });
-      return;
-    }
-    res.json(page);
+    res.json(blocks);
   } catch (error) {
-    console.error('Fetch page error:', error);
-    res.status(500).json({ error: 'Failed to fetch page' });
+    console.error('Fetch block children error:', error);
+    res.status(500).json({ error: 'Failed to fetch children' });
   }
 });
 
-app.post('/api/pages', async (req: AuthRequest, res) => {
+app.get('/api/blocks/:id', async (req: AuthRequest, res) => {
   try {
-    const { title, parentId, icon, coverImage } = req.body;
+    const id = req.params.id as string;
+    const block = await prisma.block.findUnique({
+      where: { id, userId: req.user!.id }
+    });
+    if (!block) {
+      res.status(404).json({ error: 'Block not found' });
+      return;
+    }
+    res.json(block);
+  } catch (error) {
+    console.error('Fetch block error:', error);
+    res.status(500).json({ error: 'Failed to fetch block' });
+  }
+});
+
+app.post('/api/blocks', async (req: AuthRequest, res) => {
+  try {
+    const { parentId, type, content } = req.body;
     
-    const newPage = await prisma.page.create({
+    // Find the last child to generate the next rank
+    const lastChild = await prisma.block.findFirst({
+      where: { parentId: parentId || null, userId: req.user!.id },
+      orderBy: { rank: 'desc' }
+    });
+    
+    const rank = generateKeyBetween(lastChild ? lastChild.rank : null, null);
+    
+    const newBlock = await prisma.block.create({
       data: { 
-        title: title || 'Untitled', 
-        parentId, 
-        icon, 
-        coverImage, 
+        parentId: parentId || null, 
+        type: type || 'text',
+        content: content || {},
+        rank,
         userId: req.user!.id 
       }
     });
-    res.status(201).json(newPage);
+    res.status(201).json(newBlock);
   } catch (error) {
-    console.error('Create page error:', error);
-    res.status(500).json({ error: 'Failed to create page' });
+    console.error('Create block error:', error);
+    res.status(500).json({ error: 'Failed to create block' });
   }
 });
 
-app.put('/api/pages/:id', async (req: AuthRequest, res) => {
+app.put('/api/blocks/:id', async (req: AuthRequest, res) => {
   try {
     const id = req.params.id as string;
     
-    const { title, content, icon, coverImage, parentId } = req.body;
-    const updateData = { title, content, icon, coverImage, parentId };
+    const { content, type } = req.body;
+    const updateData = { content, type };
     Object.keys(updateData).forEach(key => (updateData as any)[key] === undefined && delete (updateData as any)[key]);
 
-    const updatedPage = await prisma.page.update({
+    const updatedBlock = await prisma.block.update({
       where: { id, userId: req.user!.id },
       data: updateData
     });
-    res.json(updatedPage);
+    res.json(updatedBlock);
   } catch (error) {
     if (error && (error as any).code === 'P2025') {
-      res.status(404).json({ error: 'Page not found' });
+      res.status(404).json({ error: 'Block not found' });
       return;
     }
-    console.error('Update page error:', error);
-    res.status(500).json({ error: 'Failed to update page' });
+    console.error('Update block error:', error);
+    res.status(500).json({ error: 'Failed to update block' });
   }
 });
 
-app.delete('/api/pages/:id', async (req: AuthRequest, res) => {
+app.put('/api/blocks/:parentId/sync', async (req: AuthRequest, res) => {
+  try {
+    const parentId = req.params.parentId as string;
+    const { blocks } = req.body; // Array of BlockNote blocks
+    
+    // Simple sync: delete existing children and recreate them.
+    // In a real production app, you'd want to diff and preserve IDs, but for this constraint we'll recreate.
+    await prisma.block.deleteMany({
+      where: { parentId, userId: req.user!.id }
+    });
+
+    const createBlocks = (blockNoteBlocks: any[], currentParentId: string) => {
+      let currentRank = 'a0';
+      const promises: any[] = [];
+
+      for (const block of blockNoteBlocks) {
+        const id = crypto.randomUUID();
+        promises.push(
+          prisma.block.create({
+            data: {
+              id,
+              parentId: currentParentId,
+              type: block.type,
+              content: block.props, // Store props in content
+              rank: currentRank,
+              userId: req.user!.id
+            }
+          })
+        );
+        
+        if (block.children && block.children.length > 0) {
+          promises.push(...createBlocks(block.children, id));
+        }
+
+        currentRank = generateKeyBetween(currentRank, null);
+      }
+      return promises;
+    };
+
+    const promises = createBlocks(blocks, parentId);
+    await Promise.all(promises);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Sync blocks error:', error);
+    res.status(500).json({ error: 'Failed to sync blocks' });
+  }
+});
+
+app.patch('/api/blocks/:id/move', async (req: AuthRequest, res) => {
   try {
     const id = req.params.id as string;
-    await prisma.page.delete({ where: { id, userId: req.user!.id } });
+    const { newParentId, previousBlockRank, nextBlockRank } = req.body;
+    
+    const rank = generateKeyBetween(
+      previousBlockRank || null, 
+      nextBlockRank || null
+    );
+
+    const updatedBlock = await prisma.block.update({
+      where: { id, userId: req.user!.id },
+      data: {
+        parentId: newParentId || null,
+        rank
+      }
+    });
+    res.json(updatedBlock);
+  } catch (error) {
+    console.error('Move block error:', error);
+    res.status(500).json({ error: 'Failed to move block' });
+  }
+});
+
+app.delete('/api/blocks/:id', async (req: AuthRequest, res) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.block.delete({ where: { id, userId: req.user!.id } });
     res.status(204).send();
   } catch (error) {
     if (error && (error as any).code === 'P2025') {
-      res.status(404).json({ error: 'Page not found' });
+      res.status(404).json({ error: 'Block not found' });
       return;
     }
-    console.error('Delete page error:', error);
-    res.status(500).json({ error: 'Failed to delete page' });
+    console.error('Delete block error:', error);
+    res.status(500).json({ error: 'Failed to delete block' });
   }
 });
 

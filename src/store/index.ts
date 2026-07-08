@@ -67,13 +67,16 @@ export interface Settings {
 
 export interface Page {
   id: string;
-  title: string;
-  content?: string | null;
-  icon?: string | null;
-  coverImage?: string | null;
+  type: string;
+  content: any;
   parentId?: string | null;
+  rank: string;
   createdAt: string;
   updatedAt: string;
+  // Computed fields for UI convenience
+  title?: string;
+  icon?: string;
+  coverImage?: string;
 }
 
 export type TimerMode = 'Stopwatch' | 'Timer' | 'Focus' | 'Break';
@@ -132,6 +135,7 @@ export interface AppState {
   addPage: (page: Partial<Page>) => Promise<Page | undefined>;
   updatePage: (id: string, updates: Partial<Page>) => Promise<void>;
   deletePage: (id: string) => Promise<void>;
+  movePage: (id: string, newParentId: string | null, previousRank: string | null, nextRank: string | null) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>()((set) => ({
@@ -179,7 +183,12 @@ export const useAppStore = create<AppState>()((set) => ({
         links: data.links, 
         timeSessions: data.timeSessions, 
         settings: data.settings,
-        pages: data.pages || []
+        pages: (data.pages || []).map((p: any) => ({
+          ...p,
+          title: p.content?.title || '',
+          icon: p.content?.icon || '',
+          coverImage: p.content?.coverImage || ''
+        }))
       });
     } catch (e) {
       console.error('Failed to fetch initial data', e);
@@ -411,19 +420,45 @@ export const useAppStore = create<AppState>()((set) => ({
     }
   },
 
-  // Pages
+  // Pages (Blocks of type 'page')
   addPage: async (page) => {
     const tempId = page.id || crypto.randomUUID();
-    const tempPage = { ...page, id: tempId, title: page.title || 'Untitled', createdAt: new Date().toISOString() } as Page;
+    const content = {
+      title: page.title || '',
+      icon: page.icon || '',
+      coverImage: page.coverImage || ''
+    };
+    
+    const tempPage = { 
+      ...page, 
+      id: tempId, 
+      type: 'page',
+      content,
+      title: content.title,
+      icon: content.icon,
+      coverImage: content.coverImage,
+      rank: 'temp',
+      createdAt: new Date().toISOString() 
+    } as Page;
     set((state) => ({ pages: [tempPage, ...state.pages] }));
     try {
-      const res = await apiFetch(`${API_URL}/pages`, {
+      const res = await apiFetch(`${API_URL}/blocks`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify(page),
+        body: JSON.stringify({
+          type: 'page',
+          parentId: page.parentId || null,
+          content
+        }),
       });
       if (!res.ok) throw new Error('Failed to create page');
-      const newPage = await res.json();
+      const newPageRaw = await res.json();
+      const newPage = {
+        ...newPageRaw,
+        title: newPageRaw.content?.title || '',
+        icon: newPageRaw.content?.icon || '',
+        coverImage: newPageRaw.content?.coverImage || ''
+      };
       set((state) => ({ pages: state.pages.map(p => p.id === tempId ? newPage : p) }));
       return newPage;
     } catch (e) {
@@ -435,13 +470,37 @@ export const useAppStore = create<AppState>()((set) => ({
     let originalPage: Page | undefined;
     set((state) => {
       originalPage = state.pages.find(p => p.id === id);
-      return { pages: state.pages.map(p => p.id === id ? { ...p, ...updates } as Page : p) };
+      const newContent = {
+        ...originalPage?.content,
+        ...(updates.title !== undefined ? { title: updates.title } : {}),
+        ...(updates.icon !== undefined ? { icon: updates.icon } : {}),
+        ...(updates.coverImage !== undefined ? { coverImage: updates.coverImage } : {})
+      };
+      
+      return { 
+        pages: state.pages.map(p => p.id === id ? { 
+          ...p, 
+          ...updates,
+          content: newContent,
+          title: newContent.title,
+          icon: newContent.icon,
+          coverImage: newContent.coverImage
+        } as Page : p) 
+      };
     });
+    
     try {
-      const res = await apiFetch(`${API_URL}/pages/${id}`, {
+      const state = useAppStore.getState();
+      const updatedPage = state.pages.find(p => p.id === id);
+      if (!updatedPage) return;
+
+      const res = await apiFetch(`${API_URL}/blocks/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify(updates),
+        body: JSON.stringify({
+          type: 'page',
+          content: updatedPage.content
+        }),
       });
       if (!res.ok) throw new Error('Failed to update page');
     } catch (e) {
@@ -464,7 +523,7 @@ export const useAppStore = create<AppState>()((set) => ({
       return { pages: state.pages.filter(p => !idsToDelete.includes(p.id)) };
     });
     try {
-      const res = await apiFetch(`${API_URL}/pages/${id}`, { 
+      const res = await apiFetch(`${API_URL}/blocks/${id}`, { 
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -472,6 +531,38 @@ export const useAppStore = create<AppState>()((set) => ({
     } catch (e) {
       console.error(e);
       set({ pages: originalPages });
+    }
+  },
+  movePage: async (id, newParentId, previousRank, nextRank) => {
+    let originalPage: Page | undefined;
+    set((state) => {
+      originalPage = state.pages.find(p => p.id === id);
+      return { 
+        pages: state.pages.map(p => 
+          p.id === id ? { ...p, parentId: newParentId } as Page : p
+        ) 
+      };
+    });
+    try {
+      const res = await apiFetch(`${API_URL}/blocks/${id}/move`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          newParentId,
+          previousBlockRank: previousRank,
+          nextBlockRank: nextRank
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to move page');
+      const updatedPage = await res.json();
+      set((state) => ({
+        pages: state.pages.map(p => p.id === id ? { ...p, rank: updatedPage.rank } : p)
+      }));
+    } catch (e) {
+      console.error(e);
+      if (originalPage) {
+        set((state) => ({ pages: state.pages.map(p => p.id === id ? originalPage! : p) }));
+      }
     }
   }
 }));

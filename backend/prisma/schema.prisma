@@ -13,7 +13,7 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String?  // nullable for google auth
+  password  String? // nullable for google auth
   googleId  String?  @unique
   name      String?
   avatar    String?
@@ -25,24 +25,24 @@ model User {
   links        Link[]
   timeSessions TimeSession[]
   settings     Settings?
-  pages        Page[]
+  blocks       Block[]
 }
 
 model Task {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
-  status      String   @default("Todo") // Todo, In Progress, Done
-  priority    String   @default("Medium") // Low, Medium, High, Critical
-  category    String   @default("Daily")
-  difficulty  String?  // Easy, Medium, Hard
-  completed   Boolean  @default(false)
+  status      String    @default("Todo") // Todo, In Progress, Done
+  priority    String    @default("Medium") // Low, Medium, High, Critical
+  category    String    @default("Daily")
+  difficulty  String? // Easy, Medium, Hard
+  completed   Boolean   @default(false)
   dueDate     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Event {
@@ -56,8 +56,8 @@ model Event {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Link {
@@ -70,44 +70,46 @@ model Link {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model TimeSession {
-  id          String   @id @default(uuid())
-  name        String
-  duration    Int      // in seconds
-  date        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  duration  Int // in seconds
+  date      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Settings {
-  id          String   @id @default(uuid())
-  theme       String   @default("dark")
-  focusMode   Boolean  @default(false)
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  theme     String   @default("dark")
+  focusMode Boolean  @default(false)
+  updatedAt DateTime @updatedAt
 
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Page {
-  id          String   @id @default(uuid())
-  title       String   @default("Untitled")
-  content     String?  // JSON stringified BlockNote content
-  icon        String?
-  coverImage  String?
-  parentId    String?
-  parent      Page?    @relation("PageHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
-  children    Page[]   @relation("PageHierarchy")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Block {
+  id        String   @id @default(uuid())
+  parentId  String?
+  parent    Block?   @relation("BlockHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Block[]  @relation("BlockHierarchy")
+  type      String // e.g., 'page', 'h1', 'text', 'todo', 'image'
+  content   Json     @default("{}") // Stores text, formatting, URLs, etc.
+  rank      String // Fractional index (e.g., 'a0', 'a1b') for O(1) drag-and-drop sorting
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([parentId])
+  @@index([rank])
 }
