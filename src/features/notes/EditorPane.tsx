@@ -22,10 +22,13 @@ const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
         e.preventDefault();
         e.stopPropagation();
         const id = hoveredBlockIdRef.current;
-        if (!id) return;
         
-        // Use the internal tiptap state to avoid 'no active cursor' errors
-        const block = editor.getBlock(id);
+        let block = id ? editor.getBlock(id) : undefined;
+        if (!block) {
+          const doc = editor.document;
+          block = doc[doc.length - 1];
+        }
+
         if (block) {
           editor.insertBlocks([{ type: 'paragraph' }], block, 'after');
           setTimeout(() => {
@@ -37,7 +40,7 @@ const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
             } else {
                // Manually try to find it (rough fallback)
                const doc = editor.document;
-               const idx = doc.findIndex((b: any) => b.id === block.id);
+               const idx = doc.findIndex((b: any) => b.id === block?.id);
                if (idx !== -1 && doc[idx + 1]) {
                  editor.setTextCursorPosition(doc[idx + 1], 'start');
                  editor.focus();
