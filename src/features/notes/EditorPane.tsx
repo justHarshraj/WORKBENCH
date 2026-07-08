@@ -1,12 +1,33 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import { useCreateBlockNote, SideMenuController, SideMenu, DragHandleButton, useComponentsContext } from '@blocknote/react';
+import { useCreateBlockNote, SideMenuController, SideMenu, DragHandleButton, useComponentsContext, SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
+import { BlockNoteSchema, defaultBlockSpecs, filterSuggestionItems, insertOrUpdateBlockForSlashMenu } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
-import { Image, Smile, Plus } from 'lucide-react';
+import { Image, Smile, Plus, LayoutGrid } from 'lucide-react';
 import { API_URL } from '../../store';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
+import { ProjectCardBlock } from './blocks/ProjectCardBlock';
+
+const schema = BlockNoteSchema.create({
+  blockSpecs: {
+    ...defaultBlockSpecs,
+    projectCard: ProjectCardBlock(),
+  },
+});
+
+const insertProjectCard = (editor: typeof schema.BlockNoteEditor) => ({
+  title: "Project Card",
+  onItemClick: () => {
+    insertOrUpdateBlockForSlashMenu(editor, {
+      type: "projectCard",
+    });
+  },
+  aliases: ["project", "card", "bookmark"],
+  group: "Media",
+  icon: <LayoutGrid size={18} />,
+});
 
 interface EditorPaneProps {
   pageId: string;
@@ -109,6 +130,7 @@ export const EditorPane = ({ pageId }: EditorPaneProps) => {
   }, [pageId, token]);
 
   const editor = useCreateBlockNote({
+    schema,
     initialContent: initialContent ? JSON.parse(initialContent) : undefined,
   }, [initialContent !== undefined]);
 
@@ -237,6 +259,18 @@ export const EditorPane = ({ pageId }: EditorPaneProps) => {
             onChange={handleEditorChange}
             theme="dark"
           >
+            <SuggestionMenuController
+              triggerCharacter={"/"}
+              getItems={async (query) =>
+                filterSuggestionItems(
+                  [
+                    insertProjectCard(editor),
+                    ...getDefaultReactSlashMenuItems(editor),
+                  ],
+                  query
+                )
+              }
+            />
             <SideMenuController
               sideMenu={(props) => (
                 <SideMenu {...props}>
