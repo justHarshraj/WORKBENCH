@@ -120,3 +120,13 @@ html, body {
   cursor: pointer;
   background-color: transparent !important;
 }
+
+/* Fix Notion-like block behavior: Space between blocks */
+.bn-block-outer {
+  margin-bottom: 8px !important;
+}
+
+/* Hide BlockNote's default + button since we use a custom one for new lines */
+.bn-add-block-button {
+  display: none !important;
+}
