@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import { useCreateBlockNote } from '@blocknote/react';
+import { useCreateBlockNote, SideMenuController, SideMenu, DragHandleButton } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
-import { Image, Smile } from 'lucide-react';
+import { Image, Smile, Plus } from 'lucide-react';
 import { API_URL } from '../../store';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 
@@ -175,13 +175,46 @@ export const EditorPane = ({ pageId }: EditorPaneProps) => {
           />
         </div>
 
-        {/* Editor Body */}
         <div className="editor-container" data-color-scheme="dark">
           <BlockNoteView 
             editor={editor} 
             onChange={handleEditorChange}
             theme="dark"
-          />
+          >
+            <SideMenuController
+              sideMenu={(props) => (
+                <SideMenu {...props}>
+                  <div
+                    className="p-1 cursor-pointer text-text-muted hover:bg-bg-hover hover:text-text-main rounded transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      try {
+                        const currentBlock = editor.getTextCursorPosition().block;
+                        editor.insertBlocks([{ type: 'paragraph' }], currentBlock, 'after');
+                        // Try to focus the newly inserted block
+                        setTimeout(() => {
+                          const blocks = editor.document;
+                          const currentIndex = blocks.findIndex(b => b.id === currentBlock.id);
+                          if (currentIndex !== -1 && blocks[currentIndex + 1]) {
+                            editor.setTextCursorPosition(blocks[currentIndex + 1], 'start');
+                          }
+                        }, 50);
+                      } catch (err) {
+                        // Fallback if editor has no active cursor
+                        const blocks = editor.document;
+                        const lastBlock = blocks[blocks.length - 1];
+                        editor.insertBlocks([{ type: 'paragraph' }], lastBlock, 'after');
+                      }
+                    }}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </div>
+                  <DragHandleButton {...props} />
+                </SideMenu>
+              )}
+            />
+          </BlockNoteView>
         </div>
         
         {/* Save indicator */}
