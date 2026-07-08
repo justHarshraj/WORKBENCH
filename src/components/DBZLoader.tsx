@@ -50,3 +50,4 @@ export const DBZLoader: React.FC = () => {
     </div>
   );
 };
+//fix
