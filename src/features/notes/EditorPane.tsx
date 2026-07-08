@@ -162,7 +162,7 @@ export const EditorPane = ({ pageId }: EditorPaneProps) => {
 
       <div className="max-w-4xl mx-auto w-full px-8 pb-32">
         {/* Page Header (Icon & Title) */}
-        <div className="mb-8 group">
+        <div className="mb-8 group pl-[54px]">
           {icon && (
             <div className="text-6xl mb-4 relative w-max -mt-12 z-10 group/icon">
               {icon}
