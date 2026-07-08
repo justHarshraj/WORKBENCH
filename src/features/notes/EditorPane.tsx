@@ -31,6 +31,7 @@ const insertProjectCard = (editor: typeof schema.BlockNoteEditor) => ({
 
 interface EditorPaneProps {
   pageId: string;
+  onClose?: () => void;
 }
 
 const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
@@ -75,7 +76,7 @@ const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
   );
 };
 
-export const EditorPane = ({ pageId }: EditorPaneProps) => {
+export const EditorPane = ({ pageId, onClose }: EditorPaneProps) => {
   const pages = useAppStore((state) => state.pages);
   const updatePage = useAppStore((state) => state.updatePage);
   const token = useAuthStore((state) => state.token);
@@ -243,7 +244,15 @@ export const EditorPane = ({ pageId }: EditorPaneProps) => {
         <div className="h-20" /> // Spacer when no cover
       )}
 
-      <div className="max-w-4xl mx-auto w-full px-8 pb-32">
+      <div className="max-w-4xl mx-auto w-full px-8 pb-32 pt-8">
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="flex items-center gap-2 text-sm text-text-muted hover:text-text-main mb-8 transition-colors bg-bg-card border border-border-subtle px-3 py-1.5 rounded-md w-max"
+          >
+            ← Back to Notes
+          </button>
+        )}
         {/* Page Header (Icon & Title) */}
         <div className="mb-8 group pl-[54px]">
           {icon && (
