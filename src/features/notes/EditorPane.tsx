@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
-import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
+import { BlockNoteSchema, defaultBlockSpecs, locales } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
 import { Image, Smile } from 'lucide-react';
@@ -114,6 +114,13 @@ export const EditorPane = ({ pageId, onClose }: EditorPaneProps) => {
   const editor = useCreateBlockNote({
     schema,
     initialContent: initialContent ? initialContent : undefined,
+    dictionary: {
+      ...locales.en,
+      placeholders: {
+        ...locales.en.placeholders,
+        default: "Start typing...",
+      }
+    }
   }, [initialContent !== undefined]);
 
   const handleUpdate = (updates: any) => {
@@ -280,6 +287,7 @@ export const EditorPane = ({ pageId, onClose }: EditorPaneProps) => {
             editor={editor} 
             onChange={handleEditorChange}
             theme="dark"
+            slashMenu={false}
           />
         </div>
         
