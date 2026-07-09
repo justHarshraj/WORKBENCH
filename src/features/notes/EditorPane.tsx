@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '../../store';
-import { useCreateBlockNote, SideMenuController, SideMenu, DragHandleButton, useComponentsContext, SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
+import { useCreateBlockNote, SideMenuController, SuggestionMenuController } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
-import { BlockNoteSchema, defaultBlockSpecs, filterSuggestionItems, insertOrUpdateBlockForSlashMenu } from '@blocknote/core';
+import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/mantine/style.css';
-import { Image, Smile, Plus, LayoutGrid } from 'lucide-react';
+import { Image, Smile } from 'lucide-react';
 import { API_URL } from '../../store';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { ProjectCardBlock } from './blocks/ProjectCardBlock';
@@ -17,64 +17,12 @@ const schema = BlockNoteSchema.create({
   },
 });
 
-const insertProjectCard = (editor: typeof schema.BlockNoteEditor) => ({
-  title: "Project Card",
-  onItemClick: () => {
-    insertOrUpdateBlockForSlashMenu(editor, {
-      type: "projectCard",
-    });
-  },
-  aliases: ["project", "card", "bookmark"],
-  group: "Media",
-  icon: <LayoutGrid size={18} />,
-});
-
 interface EditorPaneProps {
   pageId: string;
   onClose?: () => void;
 }
 
-const CustomAddButton = ({ editor, hoveredBlockIdRef }: any) => {
-  const Components = useComponentsContext()!;
-  return (
-    <Components.SideMenu.Button
-      label="Click to add below"
-      icon={<Plus className="w-3.5 h-3.5" strokeWidth={2.5} />}
-      onClick={(e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const id = hoveredBlockIdRef.current;
-        
-        let block = id ? editor.getBlock(id) : undefined;
-        if (!block) {
-          const doc = editor.document;
-          block = doc[doc.length - 1];
-        }
 
-        if (block) {
-          const typeToInsert = block.type === 'projectCard' ? 'projectCard' : 'paragraph';
-          editor.insertBlocks([{ type: typeToInsert }], block, 'after');
-          setTimeout(() => {
-            // Find the next block in the editor to focus it
-            const nextBlock = editor.getTextCursorPosition()?.block;
-            if (nextBlock) {
-               // We might already be focused from BlockNote's internal insert logic
-               editor.focus();
-            } else {
-               // Manually try to find it (rough fallback)
-               const doc = editor.document;
-               const idx = doc.findIndex((b: any) => b.id === block?.id);
-               if (idx !== -1 && doc[idx + 1]) {
-                 editor.setTextCursorPosition(doc[idx + 1], 'start');
-                 editor.focus();
-               }
-            }
-          }, 50);
-        }
-      }}
-    />
-  );
-};
 
 export const EditorPane = ({ pageId, onClose }: EditorPaneProps) => {
   const pages = useAppStore((state) => state.pages);
@@ -333,25 +281,14 @@ export const EditorPane = ({ pageId, onClose }: EditorPaneProps) => {
             onChange={handleEditorChange}
             theme="dark"
           >
+            {/* Disable slash menu by returning no items */}
             <SuggestionMenuController
               triggerCharacter={"/"}
-              getItems={async (query) =>
-                filterSuggestionItems(
-                  [
-                    insertProjectCard(editor),
-                    ...getDefaultReactSlashMenuItems(editor),
-                  ],
-                  query
-                )
-              }
+              getItems={async () => []}
             />
+            {/* Disable the side menu (drag handle & + button) */}
             <SideMenuController
-              sideMenu={(props) => (
-                <SideMenu {...props}>
-                  <CustomAddButton editor={editor} hoveredBlockIdRef={hoveredBlockIdRef} />
-                  <DragHandleButton {...props} />
-                </SideMenu>
-              )}
+              sideMenu={() => null}
             />
           </BlockNoteView>
         </div>

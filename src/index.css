@@ -121,20 +121,19 @@ html, body {
   background-color: var(--theme-bg-card-hover) !important;
 }
 
-.bn-side-menu button {
-  cursor: pointer;
-  background-color: transparent !important;
+/* Hide BlockNote's default side menu completely to remove the + and :: icons */
+.bn-side-menu {
+  display: none !important;
 }
 
-/* Fix Notion-like block behavior: Space between blocks */
-.bn-block-outer {
-  margin-bottom: 8px !important;
+/* Override the default placeholder text to remove the mention of '/' commands */
+.bn-editor [data-is-empty-and-focused="true"] .bn-inline-content:empty::before {
+  content: "Type something..." !important;
+  color: var(--theme-text-muted) !important;
+  opacity: 0.5;
 }
 
 /* Hide BlockNote's default + button since we use a custom one for new lines */
 .bn-add-block-button {
   display: none !important;
 }
-
-
-/*fix
